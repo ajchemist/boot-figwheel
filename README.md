@@ -6,7 +6,7 @@
 #### Usage
 [](dependency)
 ```clojure
-[ajchemist/boot-figwheel "0.3.7-0"] ;; latest release
+[ajchemist/boot-figwheel "0.3.7-1"] ;; latest release
 ```
 [](/dependency)
 
