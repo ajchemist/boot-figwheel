@@ -13,8 +13,9 @@
 (task-options!
  pom {:project 'ajchemist/boot-figwheel
       :version +version+
+      :description "Boot task providing a Figwheel for ClojureScript development."
       :url "https://github.com/aJchemist/boot-figwheel"
-      :description "Figwheel task for boot-clj"
+      :scm {:url "https://github.com/aJchemist/boot-figwheel"}
       :license {"Eclipse Public License - v 1.0" "http://www.eclipse.org/legal/epl-v10.html"}}
  aot {:all true}
  jar {:main 'boot-figwheel})
