@@ -8,7 +8,7 @@
 
 (require '[adzerk.bootlaces :refer :all])
 
-(def +version+ "0.3.7-1")
+(def +version+ "0.3.7-SNAPSHOT")
 
 (task-options!
  pom {:project 'ajchemist/boot-figwheel
@@ -18,6 +18,7 @@
       :scm {:url "https://github.com/aJchemist/boot-figwheel"}
       :license {"Eclipse Public License - v 1.0" "http://www.eclipse.org/legal/epl-v10.html"}}
  aot {:all true}
- jar {:main 'boot-figwheel})
+ jar {:main 'boot-figwheel}
+ push {:repo "deploy-clojars"})
 
 (deftask build "Build project." [] (comp (pom) (aot) (jar) (install)))

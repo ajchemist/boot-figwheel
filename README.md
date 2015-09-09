@@ -6,7 +6,7 @@
 #### Usage
 [](dependency)
 ```clojure
-[ajchemist/boot-figwheel "0.3.7-1"] ;; latest release
+[ajchemist/boot-figwheel "0.3.7-SNAPSHOT"] ;; latest release
 ```
 [](/dependency)
 
@@ -49,6 +49,15 @@ to your dependency.
   (comp (figwheel) (cljs-repl) (wait)))
 ```
 
+When dev repl has been fired,
+
+```clojure
+boot.user> (run-figwheel)   ; start figwheel server in a new pod and fire autobuild
+boot.user> (stop-figwheel)  ; stop autobuild
+boot.user> (start-figwheel) ; restart autobuild
+boot.user> ...              ; over and over and over again
+```
+
 Boot `:source-paths` env get passthru figwheel task internal state at figwheel
 pod generation time. So it can work with `cljs-repl`.
 
@@ -58,3 +67,4 @@ Figwheel has own fileset watcher. It can't be cooperated with boot-clj `watch`
 task. So you have to edit a file in `target-path` directly, if you want to use
 features like figwheel css live reloading, etc.
 
+Some day filtered(?) watch loop may be emerged.
