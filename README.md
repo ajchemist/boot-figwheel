@@ -15,7 +15,7 @@ to your dependency.
 
 [](require)
 ```clojure
-(require '[boot-figwheel :refer [figwheel run-figwheel stop-figwheel start-figwheel]])
+(require '[boot-figwheel :refer :all])
 ```
 [](/require)
 
@@ -52,10 +52,13 @@ to your dependency.
 When dev repl has been fired,
 
 ```clojure
-boot.user> (run-figwheel)   ; start figwheel server in a new pod and fire autobuild
-boot.user> (stop-figwheel)  ; stop autobuild
-boot.user> (start-figwheel) ; restart autobuild
-boot.user> ...              ; over and over and over again
+boot.user> (run-figwheel)     ; start figwheel server in a new pod and fire autobuild
+boot.user> (stop-figwheel)    ; stop autobuild
+boot.user> (start-figwheel)   ; restart autobuild
+boot.user> ...                ; over and over and over again
+boot.user> (destroy-figwheel)
+boot.user> (run-figwheel)
+boot.user> ...
 ```
 
 Boot `:source-paths` env get passthru figwheel task internal state at figwheel
