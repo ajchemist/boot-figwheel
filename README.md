@@ -6,16 +6,16 @@
 #### Usage
 [](dependency)
 ```clojure
-[ajchemist/boot-figwheel "0.3.7-SNAPSHOT"] ;; latest release
+[ajchemist/boot-figwheel "0.3.9-0"] ;; latest release
 ```
 [](/dependency)
 
 You don't need to add `figwheel`,`figwheel-sidecar` or of course `lein-figwheel`
-to your dependency.
+to project dependency.
 
 [](require)
 ```clojure
-(require '[boot-figwheel :refer [figwheel run-figwheel stop-figwheel start-figwheel]])
+(require '[boot-figwheel :refer :all])
 ```
 [](/require)
 
@@ -52,10 +52,18 @@ to your dependency.
 When dev repl has been fired,
 
 ```clojure
-boot.user> (run-figwheel)   ; start figwheel server in a new pod and fire autobuild
-boot.user> (stop-figwheel)  ; stop autobuild
-boot.user> (start-figwheel) ; restart autobuild
-boot.user> ...              ; over and over and over again
+boot.user> (run-figwheel)     ; start figwheel server in a new pod and fire autobuild
+boot.user> (stop-figwheel)    ; stop autobuild
+boot.user> (start-figwheel)   ; restart autobuild
+boot.user> ...                ; over and over and over again
+
+boot.user> (start-repl)       ; maybe want to fire cljs-repl (`weasel' repl wrapped by `boot-cljs-repl')
+cljs.core> :cljs/quit
+boot.user> (stop-figwheel)
+
+boot.user> (destroy-figwheel)
+boot.user> (run-figwheel)
+boot.user> ...
 ```
 
 Boot `:source-paths` env get passthru figwheel task internal state at figwheel
@@ -68,3 +76,6 @@ task. So you have to edit a file in `target-path` directly, if you want to use
 features like figwheel css live reloading, etc.
 
 Some day filtered(?) watch loop may be emerged.
+
+Personally I recommend [garden](https://github.com/noprompt/garden) to spit a
+compiled css file in dev runtime.

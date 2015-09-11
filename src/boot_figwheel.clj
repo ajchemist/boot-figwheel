@@ -12,36 +12,42 @@
 (def ^:private fw-config (volatile! nil))
 
 (def ^:private deps
-  (delay (remove pod/dependency-loaded? '[[figwheel-sidecar "0.3.7" :exclusions [cider/cider-nrepl]]])))
+  (delay (remove pod/dependency-loaded? '[[figwheel-sidecar "0.3.9" :exclusions [cider/cider-nrepl]]])))
 
 (defn run-figwheel []
   (let [pod-env (update (core/get-env) :dependencies into @deps)
         pod (future (pod/make-pod pod-env))
         fw-config (assoc-in @fw-config [:builds 0 :source-paths] (vec (core/get-env :source-paths)))]
+    (util/info "Make a fresh Figwheel pod...\n")    
     (pod/with-eval-in @pod
-      (require '[figwheel-sidecar.core :refer [start-server]]
+      (require '[figwheel-sidecar.core :refer [start-server stop-server]]
                '[figwheel-sidecar.auto-builder :refer [autobuild*]]
                '[clojurescript-build.auto :refer [stop-autobuild!]]
                '[environ.core])
       (alter-var-root (var environ.core/env) (fn [_] ~environ.core/env))
-      (def +fw-server+ (start-server (:figwheel-server ~fw-config)))
-      (def +fw-config+ (assoc ~fw-config :figwheel-server +fw-server+))
-      (def +fw-builder+ (autobuild* +fw-config+)))
-    (println "Figwheel pod has been created.")
+      (defonce fwp-server (start-server (:figwheel-server ~fw-config)))
+      (def fwp-config (volatile! (assoc ~fw-config :figwheel-server fwp-server)))
+      (def fwp-builder (volatile! (autobuild* @fwp-config))))
     (vreset! fw-pod @pod)))
 
-(defn update-figwheel []
-  (pod/with-eval-in @fw-pod
-    (alter-var-root (var environ.core/env) (fn [_] ~environ.core/env))))
-
 (defn stop-figwheel []
-  (pod/with-eval-in @fw-pod (stop-autobuild! +fw-builder+)))
+  (pod/with-eval-in @fw-pod
+    (alter-var-root (var environ.core/env) (fn [_] ~environ.core/env))
+    (stop-autobuild! @fwp-builder)))
 
 (defn start-figwheel
-  ([] (pod/with-eval-in @fw-pod (def +fw-builder+ (autobuild* +fw-config+))))
-  ([config] (pod/with-eval-in @fw-pod
-              (def +fw-config+ (assoc ~config :figwheel-server +fw-server+))
-              (def +fw-builder+ (autobuild* +fw-config+)))))
+  ([] (pod/with-eval-in @fw-pod
+        (vreset! fwp-builder (autobuild* @fwp-config))))
+  ([config]
+   (pod/with-eval-in @fw-pod 
+     (vreset! fwp-config (assoc ~config :figwheel-server fwp-server))
+     (vreset! fwp-builder (autobuild* @fwp-config)))))
+
+(defn destroy-figwheel []
+  (util/info "Stop Figwheel httpkit server...\n")
+  (pod/with-eval-in @fw-pod (stop-server fwp-server))
+  (util/info "Destroy Figwheel pod...\n")
+  (pod/destroy-pod @fw-pod))
 
 (deftask figwheel
   [f figwheel-config FWCONFIG edn "Figwheel task configuration."]

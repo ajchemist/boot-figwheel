@@ -8,7 +8,7 @@
 
 (require '[adzerk.bootlaces :refer :all])
 
-(def +version+ "0.3.7-SNAPSHOT")
+(def +version+ "0.3.9-0")
 
 (task-options!
  pom {:project 'ajchemist/boot-figwheel
