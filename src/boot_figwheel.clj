@@ -12,7 +12,9 @@
 (def ^:private fw-config (volatile! nil))
 
 (def ^:private deps
-  (delay (remove pod/dependency-loaded? '[[figwheel-sidecar "0.3.9" :exclusions [cider/cider-nrepl]]])))
+  (delay (remove pod/dependency-loaded?
+                 '[[figwheel-sidecar "0.4.0"]
+                   [com.cemerick/piggieback "0.2.1"]])))
 
 (defn run-figwheel []
   (let [pod-env (update (core/get-env) :dependencies into @deps)

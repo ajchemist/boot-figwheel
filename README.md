@@ -6,17 +6,22 @@
 #### Usage
 [](dependency)
 ```clojure
-[ajchemist/boot-figwheel "0.3.9-0"] ;; latest release
+[ajchemist/boot-figwheel "0.4.0-0"] ;; latest release
 ```
 [](/dependency)
 
-You don't need to add `figwheel`,`figwheel-sidecar` or of course `lein-figwheel`
-to project dependency.
+You don't need to add `figwheel`,`figwheel-sidecar` or of course `lein-figwheel` to dependency.
 
 [](require)
 ```clojure
 (require '[boot-figwheel :refer :all])
 ```
+`figwheel`<br/>
+`run-figwheel`<br/>
+`destroy-figwheel`<br/>
+`stop-figwheel`<br/>
+`start-figwheel`
+
 [](/require)
 
 ```clojure
@@ -24,7 +29,7 @@ to project dependency.
  figwheel {:figwheel-config
            (let [p (rand-port)]
              {:builds [{:id "dev"
-                        :source-paths ["src"]
+                        :source-paths ["src"] ; dummy
                         :compiler (merge none-opts
                                          {:main "adzerk.boot-cljs-repl"
                                           :output-to "target/app.js"
@@ -66,8 +71,7 @@ boot.user> (run-figwheel)
 boot.user> ...
 ```
 
-Boot `:source-paths` env get passthru figwheel task internal state at figwheel
-pod generation time. So it can work with `cljs-repl`.
+Boot `:source-paths` env get passthru internal state of `figwheel` task at `run-figwheel` pod generation time. So it can work with `cljs-repl`.
 
 #### Limitation
 
