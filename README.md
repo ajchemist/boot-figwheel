@@ -1,12 +1,12 @@
 # boot-figwheel
 
 ####Current version:
-[![Clojars Project](https://clojars.org/ajchemist/boot-figwheel/latest-version.svg)](http://clojars.org/ajchemist/boot-figwheel)
+[![Clojars Project](http://clojars.org/ajchemist/boot-figwheel/latest-version.svg)](http://clojars.org/ajchemist/boot-figwheel)
 
 #### Usage
 [](dependency)
 ```clojure
-[ajchemist/boot-figwheel "0.4.0-0"] ;; latest release
+[ajchemist/boot-figwheel "0.4.1-0"] ;; latest release
 ```
 [](/dependency)
 
@@ -16,6 +16,9 @@ You don't need to add `figwheel`,`figwheel-sidecar` or of course `lein-figwheel`
 ```clojure
 (require '[boot-figwheel :refer :all])
 ```
+
+Currently, following public api provided.
+
 `figwheel`<br/>
 `run-figwheel`<br/>
 `destroy-figwheel`<br/>

@@ -13,7 +13,7 @@
 
 (def ^:private deps
   (delay (remove pod/dependency-loaded?
-                 '[[figwheel-sidecar "0.4.0"]
+                 '[[figwheel-sidecar "0.4.1"]
                    [com.cemerick/piggieback "0.2.1"]])))
 
 (defn run-figwheel []
