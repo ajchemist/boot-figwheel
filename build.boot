@@ -8,7 +8,7 @@
 
 (require '[adzerk.bootlaces :refer :all])
 
-(def +version+ "0.4.0-0")
+(def +version+ "0.4.1-0")
 
 (task-options!
  pom {:project 'ajchemist/boot-figwheel
@@ -21,4 +21,4 @@
  jar {:main 'boot-figwheel}
  push {:repo "deploy-clojars"})
 
-(deftask build "Build project." [] (comp (pom) (aot) (jar) (install)))
+(deftask build "Build project." [] (comp (aot) (build-jar)))
