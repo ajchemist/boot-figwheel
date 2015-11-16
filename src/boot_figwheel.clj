@@ -1,57 +1,155 @@
 (ns boot-figwheel
   {:boot/export-tasks true}
   (:require [clojure.java.io :as io]
-            [boot.pod :as pod]
+            [clojure.string  :as str]
+            [clojure.repl :refer [doc]]
             [boot.util :as util]
-            [boot.core :as core :refer [deftask tmp-dir!]]
-            [boot.task.built-in :refer [repl]]
-            [boot.from.backtick :refer [template]]
-            [environ.core]))
+            [boot.core :as core :refer [deftask]]))
 
-(def ^:private fw-pod (volatile! nil))
-(def ^:private fw-config (volatile! nil))
+(def ^:dynamic *boot-figwheel-system* nil)
+
+(defmacro ^:private r [sym] `(resolve '~sym))
 
 (def ^:private deps
-  (delay (remove pod/dependency-loaded?
-                 '[[figwheel-sidecar "0.4.1"]
-                   [com.cemerick/piggieback "0.2.1"]])))
+  '[[figwheel-sidecar "0.5.0-1" :scope "test"]
+    [com.cemerick/piggieback "0.2.1" :scope "test"]])
 
-(defn run-figwheel []
-  (let [pod-env (update (core/get-env) :dependencies into @deps)
-        pod (future (pod/make-pod pod-env))
-        fw-config (assoc-in @fw-config [:builds 0 :source-paths] (vec (core/get-env :source-paths)))]
-    (util/info "Make a fresh Figwheel pod...\n")    
-    (pod/with-eval-in @pod
-      (require '[figwheel-sidecar.core :refer [start-server stop-server]]
-               '[figwheel-sidecar.auto-builder :refer [autobuild*]]
-               '[clojurescript-build.auto :refer [stop-autobuild!]]
-               '[environ.core])
-      (alter-var-root (var environ.core/env) (fn [_] ~environ.core/env))
-      (defonce fwp-server (start-server (:figwheel-server ~fw-config)))
-      (def fwp-config (volatile! (assoc ~fw-config :figwheel-server fwp-server)))
-      (def fwp-builder (volatile! (autobuild* @fwp-config))))
-    (vreset! fw-pod @pod)))
+(defn- assert-deps
+  "Advices user to add direct deps to requires deps if they
+  are not available."
+  []
+  (let [current (->> (core/get-env :dependencies) (map first) set)
+        missing (->> deps (remove (comp current first)))]
+    (if (seq missing)
+      (util/warn
+       (str "You are missing necessary dependencies for boot-figwheel.\n"
+            "Please add the following dependencies to your project:\n"
+            (str/join "\n" missing) "\n\n")))))
 
-(defn stop-figwheel []
-  (pod/with-eval-in @fw-pod
-    (alter-var-root (var environ.core/env) (fn [_] ~environ.core/env))
-    (stop-autobuild! @fwp-builder)))
+(defn- add-boot-source-paths [{:keys [all-builds] :as options}]
+  (assoc options :all-builds
+         (mapv (fn [build]
+                 (update build :source-paths
+                         #(vec (into (core/get-env :source-paths) %))))
+               all-builds)))
 
-(defn start-figwheel
-  ([] (pod/with-eval-in @fw-pod
-        (vreset! fwp-builder (autobuild* @fwp-config))))
-  ([config]
-   (pod/with-eval-in @fw-pod 
-     (vreset! fwp-config (assoc ~config :figwheel-server fwp-server))
-     (vreset! fwp-builder (autobuild* @fwp-config)))))
-
-(defn destroy-figwheel []
-  (util/info "Stop Figwheel httpkit server...\n")
-  (pod/with-eval-in @fw-pod (stop-server fwp-server))
-  (util/info "Destroy Figwheel pod...\n")
-  (pod/destroy-pod @fw-pod))
-
-(deftask figwheel
-  [f figwheel-config FWCONFIG edn "Figwheel task configuration."]
-  (vreset! fw-config figwheel-config)
+(deftask figwheel "Figwheel interface for Boot repl"
+  [b ids              BUILD_IDS [str] "Figwheel build-ids"
+   c all-builds       ALL_BUILDS edn  "Figwheel all-builds compiler-options"
+   o figwheel-options FW_OPTS    edn  "Figwheel options"]
+  (assert-deps)
+  (util/info "Require figwheel-sidecar.system...\n")
+  (require '[figwheel-sidecar.system :as fs]
+           '[com.stuartsierra.component :as component])
   identity)
+
+(defn start-figwheel!
+  "If you aren't connected to an env where fighweel is running already,
+  this method will start the figwheel server with the passed in build info."
+  []
+  (when *boot-figwheel-system*
+    (alter-var-root #'*boot-figwheel-system* (r component/stop)))
+  (alter-var-root #'*boot-figwheel-system*
+    (fn [_]
+      (let [options (-> #'figwheel meta :task-options
+                        (select-keys [:build-ids :all-builds :figwheel-options])
+                        add-boot-source-paths)]
+        ((r fs/start-figwheel!)
+         options)))))
+
+(defn stop-figwheel!
+  "If a figwheel process is running, this will stop all the Figwheel autobuilders and stop the figwheel Websocket/HTTP server."
+  []
+  (when *boot-figwheel-system*
+    (alter-var-root #'*boot-figwheel-system* (r component/stop))))
+
+(defn- figwheel-running? []
+  (or *boot-figwheel-system*
+      (do
+        (println "Figwheel System not itnitialized.\nPlease start it with boot-figwheel/start-figwheel!")
+        nil)))
+
+(defn- app-trans
+  ([func ids]
+   (when (figwheel-running?)
+     (let [system (get-in *boot-figwheel-system* [:figwheel-system :system])]
+       (reset! system (func @system ids)))))
+  ([func]
+   (when (figwheel-running?)
+     (let [system (get-in *boot-figwheel-system* [:figwheel-system :system])]
+       (reset! system (func @system))))))
+
+(defn build-once
+  "Compiles the builds with the provided build ids
+(or the current default ids) once."
+  [& ids]
+  (app-trans (r fs/build-once) ids))
+
+(defn clean-builds
+  "Deletes the compiled artifacts for the builds with the provided
+build ids (or the current default ids)."
+  [& ids]
+  (app-trans (r fs/clean-builds) ids))
+
+(defn stop-autobuild
+  "Stops the currently running autobuild process."
+  [& ids]
+  (app-trans (r fs/stop-autobuild) ids))
+
+(defn start-autobuild
+  "Starts a Figwheel autobuild process for the builds associated with
+the provided ids (or the current default ids)."
+  [& ids]
+  (app-trans (r fs/start-autobuild) ids))
+
+(defn switch-to-build
+  "Stops the currently running autobuilder and starts building the
+builds with the provided ids."
+  [& ids]
+  (app-trans (r fs/switch-to-build) ids))
+
+(defn reset-autobuild
+  "Stops the currently running autobuilder, cleans the current builds,
+and starts building the default builds again."
+  []
+  (app-trans (r fs/reset-autobuild)))
+
+(defn reload-config
+  "Reloads the build config, and resets the autobuild."
+  []
+  (app-trans (r fs/reload-config)))
+
+(defn print-config
+  "Prints out the build configs currently focused or optionally the
+  configs of the ids provided."
+  [& ids]
+  ((r fs/print-config)
+   @(get-in *boot-figwheel-system* [:figwheel-system :system])
+   ids))
+
+(defn cljs-repl
+  "Starts a Figwheel ClojureScript REPL for the provided build id (or
+  the first default id)."
+  ([] (cljs-repl nil))
+  ([id]
+   (when (figwheel-running?)
+     ((r fs/cljs-repl) (:figwheel-system *boot-figwheel-system*) id))))
+
+(defn fig-status
+  "Display the current status of the running Figwheel system."
+  []
+  (app-trans (r fs/fig-status)))
+
+(defn api-help
+  "Print out help for the Figwheel REPL api"
+  []
+  (doc cljs-repl)
+  (doc fig-status)
+  (doc start-autobuild)
+  (doc stop-autobuild)
+  (doc build-once)
+  (doc clean-builds)
+  (doc switch-to-build)
+  (doc reset-autobuild)
+  (doc reload-config)
+  (doc api-help))

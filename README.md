@@ -1,88 +1,86 @@
 # boot-figwheel
 
-####Current version:
+[Fiwheel] interface for [Boot] repl.
+
+boot-figwheel currently intend to provide same api that exist in [figwheel-sidecar.repl-api](https://github.com/bhauman/lein-figwheel/blob/7f3cd40d6beb24ad5914222b6231fa2f98f1de03/sidecar/src/figwheel_sidecar/repl_api.clj).
+
+## Current version:
 [![Clojars Project](http://clojars.org/ajchemist/boot-figwheel/latest-version.svg)](http://clojars.org/ajchemist/boot-figwheel)
 
-#### Usage
 [](dependency)
 ```clojure
-[ajchemist/boot-figwheel "0.4.1-0"] ;; latest release
+[ajchemist/boot-figwheel "0.5.0-SNAPSHOT"] ;; latest release
+[com.cemerick/piggieback "0.2.1" :scope "test"]
+[figwheel-sidecar "0.5.0-1" :scope "test"]
 ```
 [](/dependency)
 
-You don't need to add `figwheel`,`figwheel-sidecar` or of course `lein-figwheel` to dependency.
+**NOTE**: Version 0.5.0 changed how the REPL dependencies are handled. For now user is required to add dependencies to one's project which are necessary libraries. `figwheel` task will print the required dependecies when run. This change related to [this](https://github.com/adzerk-oss/boot-cljs-repl/commit/e05d587240a46067633362f8aa0164ea8ed61f52).
+
+## Usage
 
 [](require)
 ```clojure
-(require '[boot-figwheel :refer :all])
+(require 'boot-figwheel)
+(refer 'boot-figwheel :rename '{cljs-repl fw-cljs-repl}) ; avoid some symbols
 ```
-
-Currently, following public api provided.
-
-`figwheel`<br/>
-`run-figwheel`<br/>
-`destroy-figwheel`<br/>
-`stop-figwheel`<br/>
-`start-figwheel`
-
 [](/require)
 
 ```clojure
 (task-options!
- figwheel {:figwheel-config
-           (let [p (rand-port)]
-             {:builds [{:id "dev"
-                        :source-paths ["src"] ; dummy
-                        :compiler (merge none-opts
-                                         {:main "adzerk.boot-cljs-repl"
-                                          :output-to "target/app.js"
-                                          :output-dir "target/out"
-                                          :asset-path "out"})
-                        :figwheel {:websocket-url (format "ws://localhost:%d/figwheel-ws" p)
-                                   :build-id "dev"
-                                   :on-jsload "<<ns.core>>.main"
-                                   :heads-up-display true
-                                   :autoload true
-                                   :debug false}}]
-              :figwheel-server {:repl true
-                                :server-port p
-                                :http-server-root "target"
-                                :css-dirs ["target"]
-                                :open-file-command "emacsclient"}})})
+ figwheel {:build-ids  ["dev"]
+           :all-builds [{:id "dev"
+                         :compiler {:main 'app.core
+                                    :output-to "target/app.js"
+                                    :output-dir "target/out"
+                                    :asset-path "out"}
+                         :figwheel {:build-id  "dev"
+                                    :on-jsload "app.core/main"
+                                    :heads-up-display true
+                                    :autoload true
+                                    :debug false}}]
+           :figwheel-options {:repl true
+                              :http-server-root "target"
+                              :css-dirs ["target"]
+                              :open-file-command "emacsclient"}})
 ```
 
 ```clojure
 (deftask dev []
   (set-env! :source-paths #(into % ["src"]))
-  (comp (figwheel) (cljs-repl) (wait)))
+  (comp (repl) (figwheel)))
 ```
+`figwheel` task injects `:source-paths` environment to your figwheel `all-builds` configuration.
 
-When dev repl has been fired,
-
+When dev repl has been fired, ordinary dev routines follow.
 ```clojure
-boot.user> (run-figwheel)     ; start figwheel server in a new pod and fire autobuild
-boot.user> (stop-figwheel)    ; stop autobuild
-boot.user> (start-figwheel)   ; restart autobuild
-boot.user> ...                ; over and over and over again
-
-boot.user> (start-repl)       ; maybe want to fire cljs-repl (`weasel' repl wrapped by `boot-cljs-repl')
+boot.user> (start-figwheel!)
+boot.user> (start-autobuild)
+boot.user> (stop-autobuild)
+boot.user> (fw-cljs-repl)
+cljs.core> (fig-status)
 cljs.core> :cljs/quit
-boot.user> (stop-figwheel)
-
-boot.user> (destroy-figwheel)
-boot.user> (run-figwheel)
-boot.user> ...
+boot.user> (stop-figwheel!)
 ```
 
-Boot `:source-paths` env get passthru internal state of `figwheel` task at `run-figwheel` pod generation time. So it can work with `cljs-repl`.
+## Limitation
 
-#### Limitation
-
-Figwheel has own fileset watcher. It can't be cooperated with boot-clj `watch`
-task. So you have to edit a file in `target-path` directly, if you want to use
-features like figwheel css live reloading, etc.
-
-Some day filtered(?) watch loop may be emerged.
+Figwheel has own fileset watcher. It can't be cooperated with boot-clj `watch` task. So if you want to use features like figwheel css live reloading, etc; you have to edit a file in `:target-path` directly
 
 Personally I recommend [garden](https://github.com/noprompt/garden) to spit a
-compiled css file in dev runtime.
+compiled css file in dev runtime in repl.
+
+## Change
+
+### 0.5.0
+- [ BREAKING ] Figwheel has changed a lot since `0.5.0` release. So boot-figwheel have had to adapt to it. Now boot-figwheel doesn't make another pod for `figwheel` and `figwheel` runs on the same pod where your app runs. But figwheel-sidecar is only required when current boot task is  compose of `figwheel` task.
+
+## License
+
+Copyright © 2015 aJchemist
+
+Licensed under Eclipse Public License.
+
+[Boot]:           https://github.com/boot-clj/boot
+[boot-cljs-repl]: https://github.com/adzerk-oss/boot-cljs-repl
+[Fiwheel]:        https://github.com/bhauman/lein-figwheel
