@@ -31,9 +31,7 @@ boot-figwheel currently intend to provide same api that exist in [figwheel-sidec
  figwheel {:build-ids  ["dev"]
            :all-builds [{:id "dev"
                          :compiler {:main 'app.core
-                                    :output-to "target/app.js"
-                                    :output-dir "target/out"
-                                    :asset-path "out"}
+                                    :output-to "app.js"}
                          :figwheel {:build-id  "dev"
                                     :on-jsload "app.core/main"
                                     :heads-up-display true
@@ -50,7 +48,7 @@ boot-figwheel currently intend to provide same api that exist in [figwheel-sidec
   (set-env! :source-paths #(into % ["src"]))
   (comp (repl) (figwheel)))
 ```
-`figwheel` task injects `:source-paths` environment to your figwheel `all-builds` configuration.
+`figwheel` task injects `:source-paths` environment to your figwheel `all-builds` configuration. And it also checks build `:output-to` so that the build output locate in `:target-path` environment.
 
 When dev repl has been fired, ordinary dev routines follow.
 ```clojure

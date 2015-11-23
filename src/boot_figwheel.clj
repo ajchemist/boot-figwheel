@@ -4,6 +4,7 @@
             [clojure.string  :as str]
             [clojure.repl :refer [doc]]
             [boot.util :as util]
+            [boot.file :as file]
             [boot.core :as core :refer [deftask]]))
 
 (def ^:dynamic *boot-figwheel-system* nil)
@@ -33,6 +34,31 @@
                          #(vec (into (core/get-env :source-paths) %))))
                all-builds)))
 
+(defn- check-build-output-to [build]
+  (let [{id :id}    build
+        target-path (core/get-env :target-path)]
+    (update-in build [:compiler :output-to]
+               #(.getPath (io/file target-path (if (string? %) % (str id ".js")))))))
+
+(defn- check-build-output-dir [build]
+  (let [{id :id}   build
+        output-to  (get-in build [:compiler :output-to])
+        parent     (file/parent output-to)
+        output-dir (get-in build [:compiler :output-dir])
+        output-dir (io/file parent (if (string? output-dir) output-dir (str id ".out")))
+        asset-path (file/relative-to parent output-dir)]
+    (-> build
+      (assoc-in [:compiler :output-dir] (.getPath output-dir))
+      (assoc-in [:compiler :asset-path] (.getPath asset-path)))))
+
+(defn- check-output-path [options]
+  (update options :all-builds
+          (fn [all-builds]
+            (mapv #(-> %
+                     check-build-output-to
+                     check-build-output-dir)
+                  all-builds))))
+
 (deftask figwheel "Figwheel interface for Boot repl"
   [b ids              BUILD_IDS [str] "Figwheel build-ids"
    c all-builds       ALL_BUILDS edn  "Figwheel all-builds compiler-options"
@@ -53,9 +79,9 @@
     (fn [_]
       (let [options (-> #'figwheel meta :task-options
                         (select-keys [:build-ids :all-builds :figwheel-options])
-                        add-boot-source-paths)]
-        ((r fs/start-figwheel!)
-         options)))))
+                        add-boot-source-paths
+                        check-output-path)]
+        ((r fs/start-figwheel!) options)))))
 
 (defn stop-figwheel!
   "If a figwheel process is running, this will stop all the Figwheel autobuilders and stop the figwheel Websocket/HTTP server."
