@@ -12,7 +12,7 @@
 (defmacro ^:private r [sym] `(resolve '~sym))
 
 (def ^:private deps
-  '[[figwheel-sidecar "0.5.0-1" :scope "test"]
+  '[[figwheel-sidecar "0.5.0-2" :scope "test"]
     [com.cemerick/piggieback "0.2.1" :scope "test"]])
 
 (defn- assert-deps

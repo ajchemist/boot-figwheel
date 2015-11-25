@@ -5,13 +5,11 @@
 boot-figwheel currently intend to provide same api that exist in [figwheel-sidecar.repl-api](https://github.com/bhauman/lein-figwheel/blob/7f3cd40d6beb24ad5914222b6231fa2f98f1de03/sidecar/src/figwheel_sidecar/repl_api.clj).
 
 ## Current version:
-[![Clojars Project](http://clojars.org/ajchemist/boot-figwheel/latest-version.svg)](http://clojars.org/ajchemist/boot-figwheel)
-
 [](dependency)
 ```clojure
-[ajchemist/boot-figwheel "0.5.0-SNAPSHOT"] ;; latest release
+[ajchemist/boot-figwheel "0.5.0-0"] ;; latest release
 [com.cemerick/piggieback "0.2.1" :scope "test"]
-[figwheel-sidecar "0.5.0-1" :scope "test"]
+[figwheel-sidecar "0.5.0-2" :scope "test"]
 ```
 [](/dependency)
 
@@ -33,7 +31,7 @@ boot-figwheel currently intend to provide same api that exist in [figwheel-sidec
                          :compiler {:main 'app.core
                                     :output-to "app.js"}
                          :figwheel {:build-id  "dev"
-                                    :on-jsload "app.core/main"
+                                    :on-jsload 'app.core/main
                                     :heads-up-display true
                                     :autoload true
                                     :debug false}}]
