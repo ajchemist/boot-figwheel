@@ -1,7 +1,7 @@
 (ns boot-figwheel
   {:boot/export-tasks true}
   (:require [clojure.java.io :as io]
-            [clojure.string  :as str]
+            [clojure.string :as str]
             [clojure.repl :refer [doc]]
             [boot.util :as util]
             [boot.file :as file]
@@ -46,7 +46,8 @@
         parent     (file/parent output-to)
         output-dir (get-in build [:compiler :output-dir])
         output-dir (io/file parent (if (string? output-dir) output-dir (str id ".out")))
-        asset-path (file/relative-to parent output-dir)]
+	      asset-path (io/file (get-in build [:compiler :asset-path]))
+        asset-path (or asset-path (file/relative-to parent output-dir))]
     (-> build
       (assoc-in [:compiler :output-dir] (.getPath output-dir))
       (assoc-in [:compiler :asset-path] (.getPath asset-path)))))
