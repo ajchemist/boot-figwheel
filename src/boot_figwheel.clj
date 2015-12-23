@@ -42,12 +42,17 @@
 
 (defn- check-build-output-dir [build]
   (let [{id :id}   build
-        output-to  (get-in build [:compiler :output-to])
-        parent     (file/parent output-to)
-        output-dir (get-in build [:compiler :output-dir])
-        output-dir (io/file parent (if (string? output-dir) output-dir (str id ".out")))
-        asset-path (io/file (get-in build [:compiler :asset-path]))
-        asset-path (or asset-path output-dir)]
+        target-path (core/get-env :target-path)
+        output-to   (get-in build [:compiler :output-to])
+        parent      (file/parent output-to)
+        output-dir  (get-in build [:compiler :output-dir])
+        output-dir  (if (string? output-dir)
+                      (io/file output-dir)
+                      (io/file parent (str id ".out")))
+        asset-path  (get-in build [:compiler :asset-path])
+        asset-path  (if (string? asset-path)
+                      (io/file asset-path)
+                      (file/relative-to target-path output-dir))]
     (-> build
       (assoc-in [:compiler :output-dir] (.getPath output-dir))
       (assoc-in [:compiler :asset-path] (.getPath asset-path)))))

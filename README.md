@@ -7,7 +7,7 @@ boot-figwheel currently intend to provide same api that exist in [figwheel-sidec
 ## Current version:
 [](dependency)
 ```clojure
-[ajchemist/boot-figwheel "0.5.0-0"] ;; latest release
+[ajchemist/boot-figwheel "0.5.0-1"] ;; latest release
 [com.cemerick/piggieback "0.2.1" :scope "test"]
 [figwheel-sidecar "0.5.0-2" :scope "test"]
 ```
