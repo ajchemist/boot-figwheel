@@ -47,7 +47,7 @@
         parent      (file/parent output-to)
         output-dir  (get-in build [:compiler :output-dir])
         output-dir  (if (string? output-dir)
-                      (io/file output-dir)
+                      (io/file target-path output-dir)
                       (io/file parent (str id ".out")))
         asset-path  (get-in build [:compiler :asset-path])
         asset-path  (if (string? asset-path)
