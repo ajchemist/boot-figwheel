@@ -7,7 +7,7 @@ boot-figwheel currently intend to provide same api that exist in [figwheel-sidec
 ## Current version:
 [](dependency)
 ```clojure
-[ajchemist/boot-figwheel "0.5.0-1"] ;; latest release
+[ajchemist/boot-figwheel "0.5.0-2"] ;; latest release
 [com.cemerick/piggieback "0.2.1" :scope "test"]
 [figwheel-sidecar "0.5.0-2" :scope "test"]
 ```
@@ -64,9 +64,14 @@ boot.user> (stop-figwheel!)
 Figwheel has own fileset watcher. It can't be cooperated with boot-clj `watch` task. So if you want to use features like figwheel css live reloading, etc; you have to edit a file in `:target-path` directly
 
 Personally I recommend [garden](https://github.com/noprompt/garden) to spit a
-compiled css file in dev runtime in repl.
+compiled css file in a dev repl.
 
 ## Change
+
+### 0.5.0-2
+- Both `:output-to` and `:output-dir` would be prefixed with `:target-path` whether they are specified or not.
+- Parent of `:output-dir` would be the same as the parent of `:output-to` unless `:output-dir` is specifed.
+- `:asset-path` would be prefixed with `:target-path` only if it's not specified. (thx [Antonis Kalou](https://github.com/kalouantonis) PR #2)
 
 ### 0.5.0
 - [ BREAKING ] Figwheel has changed a lot since `0.5.0` release. So boot-figwheel have had to adapt to it. Now boot-figwheel doesn't make another pod for `figwheel` and `figwheel` runs on the same pod where your app runs. But figwheel-sidecar is only required when current boot task is  compose of `figwheel` task.
