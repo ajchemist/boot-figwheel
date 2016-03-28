@@ -2,12 +2,12 @@
  :resource-paths #{"src"}
  :dependencies   '[[org.clojure/clojure "1.7.0" :scope "provided"]
                    
-                   [boot/core "2.4.2" :scope "test"]
+                   [boot/core "2.5.5" :scope "test"]
                    [adzerk/bootlaces "0.1.13" :scope "test"]])
 
 (require '[adzerk.bootlaces :refer :all])
 
-(def +version+ "0.5.0-2")
+(def +version+ "0.5.2-0")
 
 (task-options!
  pom {:project 'ajchemist/boot-figwheel

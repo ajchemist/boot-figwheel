@@ -7,12 +7,10 @@
             [boot.file :as file]
             [boot.core :as core :refer [deftask]]))
 
-(def ^:dynamic *boot-figwheel-system* nil)
-
 (defmacro ^:private r [sym] `(resolve '~sym))
 
 (def ^:private deps
-  '[[figwheel-sidecar "0.5.0-2" :scope "test"]
+  '[[figwheel-sidecar "0.5.2" :scope "test"]
     [com.cemerick/piggieback "0.2.1" :scope "test"]])
 
 (defn- assert-deps
@@ -66,14 +64,23 @@
                   all-builds))))
 
 (deftask figwheel "Figwheel interface for Boot repl"
-  [b ids              BUILD_IDS [str] "Figwheel build-ids"
+  [b build-ids        BUILD_IDS [str] "Figwheel build-ids"
    c all-builds       ALL_BUILDS edn  "Figwheel all-builds compiler-options"
    o figwheel-options FW_OPTS    edn  "Figwheel options"]
   (assert-deps)
-  (util/info "Require figwheel-sidecar.system...\n")
+  (util/info "Require figwheel-sidecar.system just-in-time...\n")
   (require '[figwheel-sidecar.system :as fs]
            '[com.stuartsierra.component :as component])
   identity)
+
+(defn task-options []
+  (-> #'figwheel
+    meta :task-options
+    (select-keys [:build-ids :all-builds :figwheel-options])
+    add-boot-source-paths
+    check-output-path))
+
+(def ^:dynamic *boot-figwheel-system* nil)
 
 (defn start-figwheel!
   "If you aren't connected to an env where fighweel is running already,
@@ -83,11 +90,7 @@
     (alter-var-root #'*boot-figwheel-system* (r component/stop)))
   (alter-var-root #'*boot-figwheel-system*
     (fn [_]
-      (let [options (-> #'figwheel meta :task-options
-                        (select-keys [:build-ids :all-builds :figwheel-options])
-                        add-boot-source-paths
-                        check-output-path)]
-        ((r fs/start-figwheel!) options)))))
+      ((r fs/start-figwheel!) (task-options)))))
 
 (defn stop-figwheel!
   "If a figwheel process is running, this will stop all the Figwheel autobuilders and stop the figwheel Websocket/HTTP server."
@@ -96,7 +99,7 @@
     (alter-var-root #'*boot-figwheel-system* (r component/stop))))
 
 (defn- figwheel-running? []
-  (or *boot-figwheel-system*
+  (or (get-in *boot-figwheel-system* [:figwheel-system :system-running] false)
       (do
         (println "Figwheel System not itnitialized.\nPlease start it with boot-figwheel/start-figwheel!")
         nil)))
@@ -157,7 +160,8 @@ and starts building the default builds again."
   [& ids]
   ((r fs/print-config)
    @(get-in *boot-figwheel-system* [:figwheel-system :system])
-   ids))
+   ids)
+  nil)
 
 (defn cljs-repl
   "Starts a Figwheel ClojureScript REPL for the provided build id (or

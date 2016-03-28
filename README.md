@@ -7,9 +7,9 @@ boot-figwheel currently intend to provide same api that exist in [figwheel-sidec
 ## Current version:
 [](dependency)
 ```clojure
-[ajchemist/boot-figwheel "0.5.0-2"] ;; latest release
+[ajchemist/boot-figwheel "0.5.2-0"] ;; latest release
 [com.cemerick/piggieback "0.2.1" :scope "test"]
-[figwheel-sidecar "0.5.0-2" :scope "test"]
+[figwheel-sidecar "0.5.2" :scope "test"]
 ```
 [](/dependency)
 
@@ -40,6 +40,7 @@ boot-figwheel currently intend to provide same api that exist in [figwheel-sidec
                               :css-dirs ["target"]
                               :open-file-command "emacsclient"}})
 ```
+When you need to change your cljsbuild config on live, just eval `(task-options! :figwheel {...})` at the time, and restart figwheel.
 
 ```clojure
 (deftask dev []
@@ -56,7 +57,11 @@ boot.user> (stop-autobuild)
 boot.user> (fw-cljs-repl)
 cljs.core> (fig-status)
 cljs.core> :cljs/quit
+...
+boot.user> (task-options! :figwheel {...})
+...
 boot.user> (stop-figwheel!)
+boot.user> (start-figwheel!)
 ```
 
 ## Limitation
@@ -78,7 +83,7 @@ compiled css file in a dev repl.
 
 ## License
 
-Copyright © 2015 aJchemist
+Copyright © 2015-2016 aJchemist
 
 Licensed under Eclipse Public License.
 
