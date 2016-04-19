@@ -11,7 +11,8 @@
 
 (def ^:private deps
   '[[figwheel-sidecar "0.5.2" :scope "test"]
-    [com.cemerick/piggieback "0.2.1" :scope "test"]])
+    [com.cemerick/piggieback "0.2.1" :scope "test"]
+    [org.clojure/tools.nrepl "0.2.12" :scope "test"]])
 
 (defn- assert-deps
   "Advices user to add direct deps to requires deps if they

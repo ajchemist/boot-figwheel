@@ -12,12 +12,13 @@
 
 [[Fiwheel]] interface for [[Boot]] repl.
 
-boot-figwheel currently intend to provide same api that exist in [[https://github.com/bhauman/lein-figwheel/blob/7f3cd40d6beb24ad5914222b6231fa2f98f1de03/sidecar/src/figwheel_sidecar/repl_api.clj][figwheel-sidecar.repl-api]].
+boot-figwheel currently intend to provide same api that exist in [[https://github.com/bhauman/lein-figwheel/blob/master/sidecar/src/figwheel_sidecar/repl_api.clj][figwheel-sidecar.repl-api]].
 
 ** Dependencies
 
 #+begin_src clojure
   [ajchemist/boot-figwheel "0.5.2-0"] ;; latest release
+  [org.clojure/tools.nrepl "0.2.12" :scope "test"]
   [com.cemerick/piggieback "0.2.1" :scope "test"]
   [figwheel-sidecar "0.5.2" :scope "test"]
 #+end_src
