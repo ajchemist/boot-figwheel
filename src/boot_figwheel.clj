@@ -5,7 +5,7 @@
             [clojure.repl :refer [doc]]
             [boot.util :as util]
             [boot.file :as file]
-            [boot.core :as core :refer [deftask]]))
+            [boot.core :as boot :refer [deftask]]))
 
 (defmacro ^:private r [sym] `(resolve '~sym))
 
@@ -18,7 +18,7 @@
   "Advices user to add direct deps to requires deps if they
   are not available."
   []
-  (let [current (->> (core/get-env :dependencies) (map first) set)
+  (let [current (->> (boot/get-env :dependencies) (map first) set)
         missing (->> deps (remove (comp current first)))]
     (if (seq missing)
       (util/warn
@@ -30,18 +30,18 @@
   (assoc options :all-builds
          (mapv (fn [build]
                  (update build :source-paths
-                         #(vec (into (core/get-env :source-paths) %))))
+                         #(vec (into (boot/get-env :source-paths) %))))
                all-builds)))
 
 (defn- check-build-output-to [build]
   (let [{id :id}    build
-        target-path (core/get-env :target-path)]
+        target-path (boot/get-env :target-path)]
     (update-in build [:compiler :output-to]
                #(.getPath (io/file target-path (if (string? %) % (str id ".js")))))))
 
 (defn- check-build-output-dir [build]
   (let [{id :id}   build
-        target-path (core/get-env :target-path)
+        target-path (boot/get-env :target-path)
         output-to   (get-in build [:compiler :output-to])
         parent      (file/parent output-to)
         output-dir  (get-in build [:compiler :output-dir])
@@ -69,6 +69,7 @@
    c all-builds       ALL_BUILDS edn  "Figwheel all-builds compiler-options"
    o figwheel-options FW_OPTS    edn  "Figwheel options"]
   (assert-deps)
+  (boot/task-options! figwheel *opts*)
   (util/info "Require figwheel-sidecar.system just-in-time...\n")
   (require '[figwheel-sidecar.system :as fs]
            '[com.stuartsierra.component :as component])
