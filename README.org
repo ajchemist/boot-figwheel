@@ -4,13 +4,13 @@
 #+UPDATE: Sun Apr 10 09:33:46 2016
 #+LINK: Boot           https://github.com/boot-clj/boot
 #+LINK: boot-cljs-repl https://github.com/adzerk-oss/boot-cljs-repl
-#+LINK: Fiwheel        https://github.com/bhauman/lein-figwheel
+#+LINK: Figwheel       https://github.com/bhauman/lein-figwheel
 
 [[https://clojars.org/ajchemist/boot-figwheel][https://img.shields.io/clojars/v/ajchemist/boot-figwheel.svg]]
 [[https://jarkeeper.com/ajchemist/boot-figwheel][https://jarkeeper.com/ajchemist/boot-figwheel/downloads.svg]]
 [[https://jarkeeper.com/ajchemist/boot-figwheel][https://jarkeeper.com/ajchemist/boot-figwheel/status.svg]]
 
-[[Fiwheel]] interface for [[Boot]] repl.
+[[Figwheel]] interface for [[Boot]] repl.
 
 boot-figwheel currently intend to provide same api that exist in [[https://github.com/bhauman/lein-figwheel/blob/master/sidecar/src/figwheel_sidecar/repl_api.clj][figwheel-sidecar.repl-api]].
 
@@ -20,7 +20,7 @@ boot-figwheel currently intend to provide same api that exist in [[https://githu
   [ajchemist/boot-figwheel "0.5.2-2"] ;; latest release
   [org.clojure/tools.nrepl "0.2.12" :scope "test"]
   [com.cemerick/piggieback "0.2.1" :scope "test"]
-  [figwheel-sidecar "0.5.2" :scope "test"]
+  [figwheel-sidecar "0.5.3-2" :scope "test"]
 #+end_src
 
 *NOTE*: Version 0.5.0 changed how the REPL dependencies are handled. For now user is required to add dependencies to one's project which are necessary libraries. =figwheel= task will print the required dependecies when run. This change related to [[https://github.com/adzerk-oss/boot-cljs-repl/commit/e05d587240a46067633362f8aa0164ea8ed61f52][this]].
