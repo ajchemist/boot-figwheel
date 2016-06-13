@@ -1,16 +1,17 @@
 (ns boot-figwheel
   {:boot/export-tasks true}
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
-            [clojure.repl :refer [doc]]
-            [boot.util :as util]
-            [boot.file :as file]
-            [boot.core :as boot :refer [deftask]]))
+  (:require
+   [clojure.java.io :as jio]
+   [clojure.string :as str]
+   [clojure.repl :refer [doc]]
+   [boot.core :as boot :refer [deftask]]
+   [boot.util :as util]
+   [boot.file :as file]))
 
 (defmacro ^:private r [sym] `(resolve '~sym))
 
 (def ^:private deps
-  '[[figwheel-sidecar "0.5.2" :scope "test"]
+  '[[figwheel-sidecar "0.5.x" :scope "test"]
     [com.cemerick/piggieback "0.2.1" :scope "test"]
     [org.clojure/tools.nrepl "0.2.12" :scope "test"]])
 
@@ -20,67 +21,87 @@
   []
   (let [current (->> (boot/get-env :dependencies) (map first) set)
         missing (->> deps (remove (comp current first)))]
-    (if (seq missing)
+    (when (seq missing)
       (util/warn
        (str "You are missing necessary dependencies for boot-figwheel.\n"
             "Please add the following dependencies to your project:\n"
             (str/join "\n" missing) "\n\n")))))
 
+(declare task-options)
+
 (defn- add-boot-source-paths [{:keys [all-builds] :as options}]
-  (assoc options :all-builds
-         (mapv (fn [build]
-                 (update build :source-paths
-                         #(vec (into (boot/get-env :source-paths) %))))
-               all-builds)))
+  (-> options
+    (assoc :all-builds
+      (mapv
+       (fn [build]
+         (update build :source-paths
+                 (fn [paths]
+                   (let [paths (or paths [])]
+                     (assert (vector? paths))
+                     (into (or paths []) (boot/get-env :source-paths))))))
+       all-builds))))
 
 (defn- check-build-output-to [build]
   (let [{id :id}    build
-        target-path (boot/get-env :target-path)]
-    (update-in build [:compiler :output-to]
-               #(.getPath (io/file target-path (if (string? %) % (str id ".js")))))))
+        target-path (:target-path (task-options))]
+    (assert (string? target-path))
+    (-> build
+      (update-in [:compiler :output-to]
+        (fn [out]
+          (let [out (if (string? out) out (str id ".js"))]
+            (.getPath (jio/file target-path out))))))))
 
 (defn- check-build-output-dir [build]
   (let [{id :id}   build
-        target-path (boot/get-env :target-path)
+        target-path (:target-path (task-options))
         output-to   (get-in build [:compiler :output-to])
         parent      (file/parent output-to)
         output-dir  (get-in build [:compiler :output-dir])
         output-dir  (if (string? output-dir)
-                      (io/file target-path output-dir)
-                      (io/file parent (str id ".out")))
+                      (jio/file target-path output-dir)
+                      (jio/file parent (str id ".out")))
         asset-path  (get-in build [:compiler :asset-path])
         asset-path  (if (string? asset-path)
-                      (io/file asset-path)
+                      (jio/file asset-path)
                       (file/relative-to target-path output-dir))]
     (-> build
       (assoc-in [:compiler :output-dir] (.getPath output-dir))
       (assoc-in [:compiler :asset-path] (.getPath asset-path)))))
 
-(defn- check-output-path [options]
+(defn- update-output-path [options]
   (update options :all-builds
           (fn [all-builds]
-            (mapv #(-> %
-                     check-build-output-to
-                     check-build-output-dir)
-                  all-builds))))
+            (mapv
+             (fn [build]
+               (-> build
+                 check-build-output-to
+                 check-build-output-dir))
+             all-builds))))
+
+(defn- update-figwheel-options [options]
+  (let [target-path (:target-path (task-options))]
+    (-> options
+      (update-in [:figwheel-options :http-server-root]
+        #(or % target-path))
+      (update-in [:figwheel-options :css-dirs]
+        #(or % (into % [target-path]))))))
 
 (deftask figwheel "Figwheel interface for Boot repl"
   [b build-ids        BUILD_IDS [str] "Figwheel build-ids"
    c all-builds       ALL_BUILDS edn  "Figwheel all-builds compiler-options"
-   o figwheel-options FW_OPTS    edn  "Figwheel options"]
+   o figwheel-options FW_OPTS    edn  "Figwheel options"
+   t target-path      PATH       str  "(optional) target-path specifier"]
   (assert-deps)
-  (boot/task-options! figwheel *opts*)
+  (let [target-path (or target-path "target")
+        *opts* (assoc *opts* :target-path target-path)]
+    (boot/task-options! figwheel *opts*))
   (util/info "Require figwheel-sidecar.system just-in-time...\n")
-  (require '[figwheel-sidecar.system :as fs]
-           '[com.stuartsierra.component :as component])
+  (require
+   '[figwheel-sidecar.system :as fs]
+   '[com.stuartsierra.component :as component])
   identity)
 
-(defn task-options []
-  (-> #'figwheel
-    meta :task-options
-    (select-keys [:build-ids :all-builds :figwheel-options])
-    add-boot-source-paths
-    check-output-path))
+(definline task-options [] '(:task-options (meta #'figwheel)))
 
 (def ^:dynamic *boot-figwheel-system* nil)
 
@@ -92,7 +113,12 @@
     (alter-var-root #'*boot-figwheel-system* (r component/stop)))
   (alter-var-root #'*boot-figwheel-system*
     (fn [_]
-      ((r fs/start-figwheel!) (task-options)))))
+      ((r fs/start-figwheel!)
+       (-> (task-options)
+         (select-keys [:build-ids :all-builds :figwheel-options])
+         (add-boot-source-paths)
+         (update-output-path)
+         (update-figwheel-options))))))
 
 (defn stop-figwheel!
   "If a figwheel process is running, this will stop all the Figwheel autobuilders and stop the figwheel Websocket/HTTP server."

@@ -1,13 +1,13 @@
 (set-env!
  :resource-paths #{"src"}
- :dependencies   '[[org.clojure/clojure "1.8.0" :scope "provided"]
-
-                   [boot/core "2.5.5" :scope "test"]
-                   [adzerk/bootlaces "0.1.13" :scope "test"]])
+ :dependencies
+ '[[org.clojure/clojure "1.8.0" :scope "provided"]
+   [boot/core "2.6.0" :scope "test"]
+   [adzerk/bootlaces "0.1.13" :scope "test"]])
 
 (require '[adzerk.bootlaces :refer :all])
 
-(def +version+ "0.5.2-2")
+(def +version+ "0.5.4-SNAPSHOT")
 
 (task-options!
  pom {:project 'ajchemist/boot-figwheel
@@ -20,4 +20,12 @@
  jar {:main 'boot-figwheel}
  push {:repo "deploy-clojars"})
 
-(deftask build "Build project." [] (comp (aot) (pom) (jar) (install))) ; (build-jar)
+(deftask build
+  "Build project.
+
+  boot -P build push-release"
+  []
+  (comp #_(aot) (pom) (jar) (install))) ; (build-jar)
+
+
+
