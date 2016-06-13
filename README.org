@@ -17,13 +17,15 @@ boot-figwheel currently intend to provide same api that exist in [[https://githu
 ** Dependencies
 
 #+begin_src clojure
-  [ajchemist/boot-figwheel "0.5.2-2"] ;; latest release
+  [ajchemist/boot-figwheel "0.5.4"] ;; latest release
   [org.clojure/tools.nrepl "0.2.12" :scope "test"]
   [com.cemerick/piggieback "0.2.1" :scope "test"]
-  [figwheel-sidecar "0.5.3-2" :scope "test"]
+  [figwheel-sidecar "0.5.4" :scope "test"]
 #+end_src
 
-*NOTE*: Version 0.5.0 changed how the REPL dependencies are handled. For now user is required to add dependencies to one's project which are necessary libraries. =figwheel= task will print the required dependecies when run. This change related to [[https://github.com/adzerk-oss/boot-cljs-repl/commit/e05d587240a46067633362f8aa0164ea8ed61f52][this]].
+figwheel-sidecar whose version is above 0.5.x would be well accepted.
+
+*NOTE*: After version 0.5.0, boot-figwheel changed how the REPL dependencies are handled. For now user is required to add dependencies to one's project which are necessary libraries. =figwheel= task will print the required dependecies when run. This change related to [[https://github.com/adzerk-oss/boot-cljs-repl/commit/e05d587240a46067633362f8aa0164ea8ed61f52][this]].
 
 ** Usage
 
@@ -35,19 +37,18 @@ boot-figwheel currently intend to provide same api that exist in [[https://githu
 
 #+begin_src clojure
   (task-options!
-   figwheel {:build-ids  ["dev"]
-             :all-builds [{:id "dev"
-                           :compiler {:main 'app.core
-                                      :output-to "app.js"}
-                           :figwheel {:build-id  "dev"
-                                      :on-jsload 'app.core/main
-                                      :heads-up-display true
-                                      :autoload true
-                                      :debug false}}]
-             :figwheel-options {:repl true
-                                :http-server-root "target"
-                                :css-dirs ["target"]
-                                :open-file-command "emacsclient"}})
+   figwheel
+   {:build-ids  ["dev"]
+    :all-builds [{:id "dev"
+                  :compiler {:main 'app.core
+                             :output-to "app.js"}
+                  :figwheel {:build-id  "dev"
+                             :on-jsload 'app.core/main
+                             :heads-up-display true
+                             :autoload true
+                             :debug false}}]
+    :figwheel-options {:open-file-command "emacsclient"
+                       :repl true}})
 #+end_src
 
 When you need to change your cljsbuild config on live, just eval =(task-options! :figwheel {...})= at the time, and restart figwheel.
@@ -77,13 +78,20 @@ After dev repl is fired, ordinary dev routines follow.
 
 Want to see more real usage, see also [[https://github.com/aJchemist/rum-mdl/blob/master/build.boot][build.boot]] file of [[https://github.com/aJchemist/rum-mdl][rum-mdl]] project.
 
-** Limitation
-
-Figwheel has own fileset watcher. It can't be cooperated with boot-clj =watch= task. So if you want to use features like figwheel css live reloading, etc; you have to edit a file in =:target-path= directly
-
-Personally I recommend [[https://github.com/noprompt/garden][garden]] to spit a compiled css file in a dev repl.
-
 ** Change
+
+*** 0.5.4
+
+=figwheel= has now new task-option =target-path= for specifying explicit target-path.
+
+And when
+
+- =[:figwheel-options :http-server-root]=
+- =[:figwheel-options :css-dirs]=
+
+are not specifed, boot-figwheel uses ="target"= for those.
+
+*NOTE*: [[Boot]] has recently had built-in =target= task for explicit emitting target, so now boot-figwheel can be cooperated with built-in =watch= task with =(target :no-clean true)=. [[#4]]
 
 *** 0.5.0-2
 - Both =:output-to= and =:output-dir= would be prefixed with =:target-path= whether they are specified or not.
