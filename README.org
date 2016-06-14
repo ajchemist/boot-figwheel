@@ -58,7 +58,7 @@ Task =figwheel= doesn't do nothing about building, but just sets build configura
 #+begin_src clojure
   (deftask dev []
     (set-env! :source-paths #(into % ["src"]))
-    (comp (repl) (figwheel)))
+    (comp (repl) (figwheel) (wait)))
 #+end_src
 
 =figwheel= task injects =:source-paths= environment to your figwheel =all-builds= configuration. And it also checks build =:output-to= so that the build output locate in =:target-path= environment.

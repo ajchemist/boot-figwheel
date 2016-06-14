@@ -38,7 +38,7 @@
                  (fn [paths]
                    (let [paths (or paths [])]
                      (assert (vector? paths))
-                     (into (or paths []) (boot/get-env :source-paths))))))
+                     (into paths (boot/get-env :source-paths))))))
        all-builds))))
 
 (defn- check-build-output-to [build]
@@ -101,7 +101,14 @@
    '[com.stuartsierra.component :as component])
   identity)
 
-(definline task-options [] '(:task-options (meta #'figwheel)))
+(definline ^:private task-options [] '(:task-options (meta #'figwheel)))
+
+(defn make-task-options []
+  (-> (task-options)
+    (select-keys [:build-ids :all-builds :figwheel-options])
+    (add-boot-source-paths)
+    (update-output-path)
+    (update-figwheel-options)))
 
 (def ^:dynamic *boot-figwheel-system* nil)
 
@@ -113,12 +120,7 @@
     (alter-var-root #'*boot-figwheel-system* (r component/stop)))
   (alter-var-root #'*boot-figwheel-system*
     (fn [_]
-      ((r fs/start-figwheel!)
-       (-> (task-options)
-         (select-keys [:build-ids :all-builds :figwheel-options])
-         (add-boot-source-paths)
-         (update-output-path)
-         (update-figwheel-options))))))
+      ((r fs/start-figwheel!) (make-task-options)))))
 
 (defn stop-figwheel!
   "If a figwheel process is running, this will stop all the Figwheel autobuilders and stop the figwheel Websocket/HTTP server."
