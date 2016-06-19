@@ -84,7 +84,7 @@
       (update-in [:figwheel-options :http-server-root]
         #(or % target-path))
       (update-in [:figwheel-options :css-dirs]
-        #(or % (into % [target-path]))))))
+        #(into [target-path] %)))))
 
 (deftask figwheel "Figwheel interface for Boot repl"
   [b build-ids        BUILD_IDS [str] "Figwheel build-ids"
@@ -101,7 +101,7 @@
 
 (definline ^:private task-options [] '(:task-options (meta #'figwheel)))
 
-(defn make-task-options []
+(defn make-boot-fw-task-options []
   (-> (task-options)
     (select-keys [:build-ids :all-builds :figwheel-options])
     (add-boot-source-paths)
@@ -118,7 +118,7 @@
     (alter-var-root #'*boot-figwheel-system* (r component/stop)))
   (alter-var-root #'*boot-figwheel-system*
     (fn [_]
-      ((r fs/start-figwheel!) (make-task-options)))))
+      ((r fs/start-figwheel!) (make-boot-fw-task-options)))))
 
 (defn stop-figwheel!
   "If a figwheel process is running, this will stop all the Figwheel autobuilders and stop the figwheel Websocket/HTTP server."
