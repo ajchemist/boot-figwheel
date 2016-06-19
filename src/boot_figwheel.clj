@@ -41,6 +41,9 @@
                      (into paths (boot/get-env :source-paths))))))
        all-builds))))
 
+(defn- add-boot-target-path [options]
+  (update options :target-path #(or % "target")))
+
 (defn- check-build-output-to [build]
   (let [{id :id}    build
         target-path (:target-path (task-options))]
@@ -92,9 +95,7 @@
    o figwheel-options FW_OPTS    edn  "Figwheel options"
    t target-path      PATH       str  "(optional) target-path specifier"]
   (assert-deps)
-  (let [target-path (or target-path "target")
-        *opts* (assoc *opts* :target-path target-path)]
-    (boot/task-options! figwheel *opts*))
+  (boot/task-options! figwheel *opts*)
   (util/info "Require figwheel-sidecar.system just-in-time...\n")
   (require
    '[figwheel-sidecar.system :as fs]
@@ -107,6 +108,7 @@
   (-> (task-options)
     (select-keys [:build-ids :all-builds :figwheel-options])
     (add-boot-source-paths)
+    (add-boot-target-path)
     (update-output-path)
     (update-figwheel-options)))
 
