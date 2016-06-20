@@ -1,11 +1,15 @@
 (set-env!
+ :source-paths   #{"test"}
  :resource-paths #{"src"}
  :dependencies
  '[[org.clojure/clojure "1.8.0" :scope "provided"]
    [boot/core "2.6.0" :scope "test"]
-   [adzerk/bootlaces "0.1.13" :scope "test"]])
+   [adzerk/bootlaces "0.1.13" :scope "test"]
+   [adzerk/boot-test "1.1.1" :scope "test"]])
 
-(require '[adzerk.bootlaces :refer :all])
+(require
+ '[adzerk.bootlaces :refer :all]
+ '[adzerk.boot-test :refer [test]])
 
 (def +version+ "0.5.4-2")
 
@@ -18,6 +22,7 @@
       :license {"Eclipse Public License - v 1.0" "http://www.eclipse.org/legal/epl-v10.html"}}
  aot {:all true}
  jar {:main 'boot-figwheel}
+ test {:namespaces #{'boot-figwheel.test}}
  push {:repo "deploy-clojars"})
 
 (deftask build
