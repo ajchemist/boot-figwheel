@@ -41,7 +41,7 @@
                      (into paths (boot/get-env :source-paths))))))
        all-builds))))
 
-(defn- check-build-output-to
+(defn- update-build-output-to
   [{id :id :as build}]
   (let [target-path (:target-path (task-options))]
     (assert (string? target-path))
@@ -51,7 +51,7 @@
           (let [out (if (string? out) out (str id ".js"))]
             (.getPath (jio/file target-path out))))))))
 
-(defn- check-build-source-map [build]
+(defn- update-build-source-map [build]
   (let [source-map (get-in build [:compiler :source-map])]
     (if (string? source-map)
       (let [target-path (:target-path (task-options))
@@ -64,7 +64,7 @@
             (.getPath (file/relative-to target-path parent)))))
       build)))
 
-(defn- check-build-output-dir
+(defn- update-build-output-dir
   [{id :id :as build}]
   (let [target-path (:target-path (task-options))
         output-to   (get-in build [:compiler :output-to])
@@ -87,9 +87,9 @@
             (mapv
              (fn [build]
                (-> build
-                 (check-build-output-to)
-                 (check-build-source-map)
-                 (check-build-output-dir)))
+                 (update-build-output-to)
+                 (update-build-source-map)
+                 (update-build-output-dir)))
              all-builds))))
 
 (defn- update-figwheel-options [options]
@@ -106,7 +106,7 @@
    o figwheel-options FW_OPTS    edn  "Figwheel options"
    t target-path      PATH       str  "(optional) target-path specifier"]
   (assert-deps)
-  (boot/task-options! figwheel *opts*)
+  (boot/task-options! figwheel (fn [opts] (merge opts *opts*)))
   (util/info "Require figwheel-sidecar.system just-in-time...\n")
   (require
    '[figwheel-sidecar.system :as fs]
@@ -116,7 +116,12 @@
 (definline ^:private task-options [] '(:task-options (meta #'figwheel)))
 
 (defn make-boot-fw-task-options []
-  (boot/task-options! figwheel (fn [opts] (update opts :target-path #(or % "target"))))
+  (boot/task-options!
+   figwheel
+   (fn [{:keys [all-builds] :as opts}]
+     (-> opts
+       (update :target-path #(or % "target"))
+       (update :build-ids   #(or % (mapv :id all-builds))))))
   (-> (task-options)
     (select-keys [:build-ids :all-builds :figwheel-options])
     (add-boot-source-paths)

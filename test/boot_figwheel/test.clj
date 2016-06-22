@@ -5,8 +5,9 @@
    [boot-figwheel :refer :all]))
 
 (deftest make-proper-task-options
+  (boot/task-options! figwheel {})
   (let [empty-task-options (make-boot-fw-task-options)]
-    (is (= empty-task-options {:all-builds [] :figwheel-options {:http-server-root "target", :css-dirs ["target"]}}))
+    (is (= empty-task-options {:build-ids [] :all-builds [] :figwheel-options {:http-server-root "target", :css-dirs ["target"]}}))
     (is (= (get-in (meta #'figwheel) [:task-options :target-path]) "target")))
 
   ;; alt-target
@@ -20,7 +21,7 @@
   ;; resetting
   (boot/task-options! figwheel {})
 
-  ;; check-build-output-path
+  ;; update-build-output-path
   (boot/task-options! figwheel {:build-ids ["main"] :all-builds [{:id "main"}]})
   (let [{[main-build] :all-builds} (make-boot-fw-task-options)
         {{:keys [output-to output-dir asset-path]} :compiler} main-build]
