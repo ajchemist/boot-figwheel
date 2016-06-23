@@ -20,7 +20,7 @@ boot-figwheel currently intend to provide same api that exist in [[https://githu
   [ajchemist/boot-figwheel "0.5.4-2"] ;; latest release
   [org.clojure/tools.nrepl "0.2.12" :scope "test"]
   [com.cemerick/piggieback "0.2.1" :scope "test"]
-  [figwheel-sidecar "0.5.4-3" :scope "test"]
+  [figwheel-sidecar "0.5.4-4" :scope "test"]
 #+end_src
 
 figwheel-sidecar whose version is above =0.5.x= would be well accepted.
