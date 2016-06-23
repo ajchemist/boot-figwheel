@@ -78,7 +78,10 @@ After dev repl is fired, ordinary dev routines follow.
   boot.user> (start-figwheel!)
 #+end_src
 
-Want to see more real usage, see also [[https://github.com/aJchemist/rum-mdl/blob/master/build.boot][build.boot]] file of [[https://github.com/aJchemist/rum-mdl][rum-mdl]] project.
+** Other examples
+
+- [[https://github.com/aJchemist/rum-mdl/blob/master/build.boot][rum-mdl]] project
+
 
 ** Change
 *** 0.5.4-3
