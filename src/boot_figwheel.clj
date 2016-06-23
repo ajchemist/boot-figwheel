@@ -145,6 +145,15 @@
   (start-figwheel!)
   identity)
 
+(declare build-once)
+
+(deftask fw-build-once
+  "Build supplied ids once only if *boot-figwheel-system* is running."
+  [i ids IDS [str]]
+  (when (figwheel-running?)
+    (apply build-once ids))
+  identity)
+
 (defn- app-trans
   ([func ids]
    (when (figwheel-running?)

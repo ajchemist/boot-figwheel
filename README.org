@@ -84,6 +84,16 @@ Want to see more real usage, see also [[https://github.com/aJchemist/rum-mdl/blo
 *** 0.5.4-3
 
 - [ BREAKING ] Now users should configure their =:source-paths= in =:all-builds= task option. =(get-env :source-paths)= is no longer injected into user build configurations =:source-paths=.
+- Add new =boot-figwheel= task to run figwheel-system on startup time. Users can apply this task to cljs building.
+- Add new =fw-build-once= task to build supplied ids once on startup time.
+
+#+begin_src clojure
+  (comp
+   (figwheel)
+   (boot-figwheel :ids ["main"])          ; -> "advanced" configuration is out of autobuilder
+   (fw-build-once :ids ["advanced"]))
+#+end_src
+
 - =[:figwheel-options :css-dirs]= should have explicit configuration if a user want to figwheel css watcher feature.
 
 *** 0.5.4
