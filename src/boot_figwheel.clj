@@ -141,6 +141,9 @@
 
 (deftask boot-figwheel "Start figwheel system"
   [i ids IDS [str]]
+  ;; FIXME:
+  ;; https://github.com/bhauman/lein-figwheel/blob/master/plugin/src/leiningen/figwheel.clj
+  ;; To assimilate `lein figwheel` experience
   (boot/task-options! figwheel #(assoc % :build-ids ids))
   (start-figwheel!)
   identity)

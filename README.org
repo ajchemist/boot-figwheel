@@ -40,7 +40,7 @@ figwheel-sidecar whose version is above =0.5.x= would be well accepted.
    figwheel
    {:build-ids  ["dev"]
     :all-builds [{:id "dev"
-                  :source-paths ["src"]   ; cljs(or cljc) directory
+                  :source-paths ["src"]   ; cljs(cljc) directories
                   :compiler {:main 'app.core
                              :output-to "app.js"}
                   :figwheel {:build-id  "dev"
@@ -61,7 +61,7 @@ Task =figwheel= doesn't do nothing about building, but just sets build configura
     (comp (repl) (figwheel) (wait)))
 #+end_src
 
-=figwheel= task updates =:output-to= compiler option so that the build output locate in =:target-path= (default is ="target"=).
+=figwheel= task updates =:output-to= compiler option so that the build output locate in =:target-path= (default is "target").
 
 After dev repl is fired, ordinary dev routines follow.
 #+begin_src clojure
@@ -78,14 +78,22 @@ After dev repl is fired, ordinary dev routines follow.
   boot.user> (start-figwheel!)
 #+end_src
 
-Want to see more real usage, see also [[https://github.com/aJchemist/rum-mdl/blob/master/build.boot][build.boot]] file of [[https://github.com/aJchemist/rum-mdl][rum-mdl]] project.
+** Other examples
+
+- [[https://github.com/aJchemist/cljs-devtools-sample/blob/9869b753b01638801d3e704f62a10d03abbb6ca6/build.boot][cljs-devtools-sample]] project
+
+try with
+
+: boot demo
+
+- [[https://github.com/aJchemist/rum-mdl/blob/master/build.boot][rum-mdl]] project
 
 ** Change
 *** 0.5.4-3
 
 - [ BREAKING ] Now users should configure their =:source-paths= in =:all-builds= task option. =(get-env :source-paths)= is no longer injected into user build configurations =:source-paths=.
-- Add new =boot-figwheel= task to run figwheel-system on startup time. Users can apply this task to cljs building.
-- Add new =fw-build-once= task to build supplied ids once on startup time.
+- Add new =boot-figwheel= task to run figwheel-system. Users can apply this task to cljs building on startup time.
+- Add new =fw-build-once= task to build supplied ids once. Users can also apply this task on startup time.
 
 #+begin_src clojure
   (comp

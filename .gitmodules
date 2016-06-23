@@ -1,0 +1,3 @@
+[submodule "cljs-devtools-sample"]
+	path = example/cljs-devtools-sample
+	url = https://github.com/aJchemist/cljs-devtools-sample
