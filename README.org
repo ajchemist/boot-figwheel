@@ -40,6 +40,7 @@ figwheel-sidecar whose version is above =0.5.x= would be well accepted.
    figwheel
    {:build-ids  ["dev"]
     :all-builds [{:id "dev"
+                  :source-paths ["src"]   ; cljs(or cljc) directory
                   :compiler {:main 'app.core
                              :output-to "app.js"}
                   :figwheel {:build-id  "dev"
@@ -51,17 +52,16 @@ figwheel-sidecar whose version is above =0.5.x= would be well accepted.
                        :repl true}})
 #+end_src
 
-When you need to change your cljsbuild config on live, just eval =(task-options! :figwheel {...})= at the time, and restart figwheel.
+When users need to change their cljsbuild config on live, just eval =(task-options! :figwheel {...})= at the time, and restart figwheel.
 
 Task =figwheel= doesn't do nothing about building, but just sets build configurations as metadata.
 
 #+begin_src clojure
   (deftask dev []
-    (set-env! :source-paths #(into % ["src"]))
     (comp (repl) (figwheel) (wait)))
 #+end_src
 
-=figwheel= task injects =:source-paths= environment to your figwheel =all-builds= configuration. And it also checks build =:output-to= so that the build output locate in =:target-path= environment.
+=figwheel= task updates =:output-to= compiler option so that the build output locate in =:target-path= (default is ="target"=).
 
 After dev repl is fired, ordinary dev routines follow.
 #+begin_src clojure
@@ -81,6 +81,10 @@ After dev repl is fired, ordinary dev routines follow.
 Want to see more real usage, see also [[https://github.com/aJchemist/rum-mdl/blob/master/build.boot][build.boot]] file of [[https://github.com/aJchemist/rum-mdl][rum-mdl]] project.
 
 ** Change
+*** 0.5.4-3
+
+- [ BREAKING ] Now users should configure their =:source-paths= in =:all-builds= task option. =(get-env :source-paths)= is no longer injected into user build configurations =:source-paths=.
+- =[:figwheel-options :css-dirs]= should have explicit configuration if a user want to figwheel css watcher feature.
 
 *** 0.5.4
 

@@ -29,18 +29,6 @@
 
 (declare task-options)
 
-(defn- add-boot-source-paths [{:keys [all-builds] :as options}]
-  (-> options
-    (assoc :all-builds
-      (mapv
-       (fn [build]
-         (update build :source-paths
-                 (fn [paths]
-                   (let [paths (or paths [])]
-                     (assert (vector? paths))
-                     (into paths (boot/get-env :source-paths))))))
-       all-builds))))
-
 (defn- update-build-output-to
   [{id :id :as build}]
   (let [target-path (:target-path (task-options))]
@@ -71,7 +59,7 @@
         parent      (file/parent output-to)
         output-dir  (get-in build [:compiler :output-dir])
         output-dir  (if (string? output-dir)
-                      (jio/file target-path output-dir)
+                      (jio/file parent output-dir)
                       (jio/file parent (str id ".out")))
         asset-path  (get-in build [:compiler :asset-path])
         asset-path  (if (string? asset-path)
@@ -96,9 +84,7 @@
   (let [target-path (:target-path (task-options))]
     (-> options
       (update-in [:figwheel-options :http-server-root]
-        #(or % target-path))
-      (update-in [:figwheel-options :css-dirs]
-        #(into [target-path] %)))))
+        #(or % target-path)))))
 
 (deftask figwheel "Figwheel interface for Boot repl"
   [b build-ids        BUILD_IDS [str] "Figwheel build-ids"
@@ -106,16 +92,16 @@
    o figwheel-options FW_OPTS    edn  "Figwheel options"
    t target-path      PATH       str  "(optional) target-path specifier"]
   (assert-deps)
-  (boot/task-options! figwheel (fn [opts] (merge opts *opts*)))
   (util/info "Require figwheel-sidecar.system just-in-time...\n")
   (require
    '[figwheel-sidecar.system :as fs]
    '[com.stuartsierra.component :as component])
+  (boot/task-options! figwheel (fn [opts] (merge opts *opts*)))
   identity)
 
 (definline ^:private task-options [] '(:task-options (meta #'figwheel)))
 
-(defn make-boot-fw-task-options []
+(defn make-start-fw-task-options []
   (boot/task-options!
    figwheel
    (fn [{:keys [all-builds] :as opts}]
@@ -124,11 +110,13 @@
        (update :build-ids   #(or % (mapv :id all-builds))))))
   (-> (task-options)
     (select-keys [:build-ids :all-builds :figwheel-options])
-    (add-boot-source-paths)
     (update-output-path)
     (update-figwheel-options)))
 
 (def ^:dynamic *boot-figwheel-system* nil)
+
+(defn- -start-figwheel! []
+  ((r fs/start-figwheel!) (make-start-fw-task-options)))
 
 (defn start-figwheel!
   "If you aren't connected to an env where fighweel is running already,
@@ -137,8 +125,7 @@
   (when *boot-figwheel-system*
     (alter-var-root #'*boot-figwheel-system* (r component/stop)))
   (alter-var-root #'*boot-figwheel-system*
-    (fn [_]
-      ((r fs/start-figwheel!) (make-boot-fw-task-options)))))
+    (fn [_] (-start-figwheel!))))
 
 (defn stop-figwheel!
   "If a figwheel process is running, this will stop all the Figwheel autobuilders and stop the figwheel Websocket/HTTP server."
@@ -151,6 +138,12 @@
       (do
         (println "Figwheel System not itnitialized.\nPlease start it with boot-figwheel/start-figwheel!")
         nil)))
+
+(deftask boot-figwheel "Start figwheel system"
+  [i ids IDS [str]]
+  (boot/task-options! figwheel #(assoc % :build-ids ids))
+  (start-figwheel!)
+  identity)
 
 (defn- app-trans
   ([func ids]

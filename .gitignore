@@ -1,3 +1,4 @@
 .boot
 /target
+/alt-target
 .nrepl-*
