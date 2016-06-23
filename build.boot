@@ -1,17 +1,14 @@
 (set-env!
- :source-paths   #{"test"}
  :resource-paths #{"src"}
  :dependencies
- '[[org.clojure/clojure "1.8.0" :scope "provided"]
-   [boot/core "2.6.0" :scope "test"]
-   [adzerk/bootlaces "0.1.13" :scope "test"]
+ '[[adzerk/bootlaces "0.1.13" :scope "test"]
    [adzerk/boot-test "1.1.1" :scope "test"]])
 
 (require
  '[adzerk.bootlaces :refer :all]
  '[adzerk.boot-test :refer [test]])
 
-(def +version+ "0.5.4-2")
+(def +version+ "0.5.4-3")
 
 (task-options!
  pom {:project 'ajchemist/boot-figwheel
@@ -24,6 +21,22 @@
  jar {:main 'boot-figwheel}
  test {:namespaces #{'boot-figwheel.test}}
  push {:repo "deploy-clojars"})
+
+(deftask test-profile []
+  (merge-env!
+   :source-paths #{"test"}
+   :dependencies
+   '[[org.clojure/clojure "1.8.0" :scope "provided"]
+     [boot/core "2.6.0" :scope "test"]
+     [org.clojure/tools.nrepl "0.2.12" :scope "test"]
+     [com.cemerick/piggieback "0.2.1" :scope "test"]
+     [figwheel-sidecar "0.5.4-4" :scope "test"]
+     [ring/ring-core "1.5.0"
+      :scope "test"
+      :exclusions
+      [org.clojure/tools.reader
+       org.clojure/clojure]]])
+  identity)
 
 (deftask build
   "Build project.
