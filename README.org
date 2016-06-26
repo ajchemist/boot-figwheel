@@ -9,6 +9,7 @@
 [[https://clojars.org/ajchemist/boot-figwheel][https://img.shields.io/clojars/v/ajchemist/boot-figwheel.svg]]
 [[https://jarkeeper.com/ajchemist/boot-figwheel][https://jarkeeper.com/ajchemist/boot-figwheel/downloads.svg]]
 [[https://jarkeeper.com/ajchemist/boot-figwheel][https://jarkeeper.com/ajchemist/boot-figwheel/status.svg]]
+[[https://github.com/aJchemist/cljs-devtools-sample/blob/master/build.boot][https://img.shields.io/badge/project-example-ff69b4.svg]]
 
 [[Figwheel]] interface for [[Boot]] repl.
 
@@ -17,10 +18,10 @@ boot-figwheel currently intend to provide same api that exist in [[https://githu
 ** Dependencies
 
 #+begin_src clojure
-  [ajchemist/boot-figwheel "0.5.4-3"] ;; latest release
+  [ajchemist/boot-figwheel "0.5.4-4"] ;; latest release
   [org.clojure/tools.nrepl "0.2.12" :scope "test"]
   [com.cemerick/piggieback "0.2.1" :scope "test"]
-  [figwheel-sidecar "0.5.4-4" :scope "test"]
+  [figwheel-sidecar "0.5.4-5" :scope "test"]
 #+end_src
 
 figwheel-sidecar whose version is above =0.5.x= would be well accepted.
@@ -52,9 +53,9 @@ figwheel-sidecar whose version is above =0.5.x= would be well accepted.
                        :repl true}})
 #+end_src
 
-When users need to change their cljsbuild config on live, just eval =(task-options! :figwheel {...})= at the time, and restart figwheel.
+When users need to change their cljsbuild config on live, just eval =(task-options! :figwheel {...})= at the time, and restart the figwheel.
 
-Task =figwheel= doesn't do nothing about building, but just sets build configurations as metadata.
+If a user doesn't supply =build-ids= options, figwheel-system will build all build configurations.
 
 #+begin_src clojure
   (deftask dev []
@@ -80,7 +81,7 @@ After dev repl is fired, ordinary dev routines follow.
 
 ** Other examples
 
-- [[https://github.com/aJchemist/cljs-devtools-sample/blob/9869b753b01638801d3e704f62a10d03abbb6ca6/build.boot][cljs-devtools-sample]] project
+- [[https://github.com/aJchemist/cljs-devtools-sample/blob/master/build.boot][cljs-devtools-sample]] project
 
 try with
 
@@ -89,6 +90,27 @@ try with
 - [[https://github.com/aJchemist/rum-mdl/blob/master/build.boot][rum-mdl]] project
 
 ** Change
+
+*** 0.5.4-4
+
+- [ BREAKING ] Integrate =boot-figwheel= and =fw-build-once= task functionalities into =figwheel= task.
+- Add a new =figwheel= task-option, called =once-ids= to specify configurations which are going to be built once.
+
+So now, please change following composed task
+
+#+begin_src clojure
+  (comp
+   (figwheel)
+   (boot-figwheel :ids ["main"])
+   (fw-build-once :ids ["advanced"]))
+#+end_src
+
+to this oneliner
+
+#+begin_src clojure
+  (figwheel :build-ids ["main"] :once-ids ["advanced"])
+#+end_src
+
 *** 0.5.4-3
 
 - [ BREAKING ] Now users should configure their =:source-paths= in =:all-builds= task option. =(get-env :source-paths)= is no longer injected into user build configurations =:source-paths=.
