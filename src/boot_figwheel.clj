@@ -86,17 +86,29 @@
       (update-in [:figwheel-options :http-server-root]
         #(or % target-path)))))
 
-(deftask figwheel "Figwheel interface for Boot repl"
-  [b build-ids        BUILD_IDS [str] "Figwheel build-ids"
-   c all-builds       ALL_BUILDS edn  "Figwheel all-builds compiler-options"
-   o figwheel-options FW_OPTS    edn  "Figwheel options"
-   t target-path      PATH       str  "(optional) target-path specifier"]
+(declare start-figwheel! figwheel-running? build-once)
+
+(deftask figwheel
+  "Figwheel interface for Boot repl
+
+  It will start figwheel-system"
+  [i build-ids        BUILD_IDS  [str] "Figwheel build-ids"
+   a all-builds       ALL_BUILDS  edn  "Figwheel all-builds compiler-options"
+   f figwheel-options FW_OPTS     edn  "Figwheel options"
+   o once-ids         ONCE_IDS   [str] "Supply ids to specify configurations which are going to be built once"
+   t target-path      PATH        str  "(optional) target-path specifier"]
   (assert-deps)
   (util/info "Require figwheel-sidecar.system just-in-time...\n")
   (require
    '[figwheel-sidecar.system :as fs]
    '[com.stuartsierra.component :as component])
   (boot/task-options! figwheel (fn [opts] (merge opts *opts*)))
+  ;; FIXME:
+  ;; https://github.com/bhauman/lein-figwheel/blob/master/plugin/src/leiningen/figwheel.clj
+  ;; To assimilate `lein figwheel` experience
+  (start-figwheel!)
+  (when (and once-ids (figwheel-running?))
+    (apply build-once once-ids))
   identity)
 
 (definline ^:private task-options [] '(:task-options (meta #'figwheel)))
@@ -138,24 +150,6 @@
       (do
         (println "Figwheel System not itnitialized.\nPlease start it with boot-figwheel/start-figwheel!")
         nil)))
-
-(deftask boot-figwheel "Start figwheel system"
-  [i ids IDS [str]]
-  ;; FIXME:
-  ;; https://github.com/bhauman/lein-figwheel/blob/master/plugin/src/leiningen/figwheel.clj
-  ;; To assimilate `lein figwheel` experience
-  (boot/task-options! figwheel #(assoc % :build-ids ids))
-  (start-figwheel!)
-  identity)
-
-(declare build-once)
-
-(deftask fw-build-once
-  "Build supplied ids once only if *boot-figwheel-system* is running."
-  [i ids IDS [str]]
-  (when (figwheel-running?)
-    (apply build-once ids))
-  identity)
 
 (defn- app-trans
   ([func ids]

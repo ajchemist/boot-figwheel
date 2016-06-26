@@ -17,7 +17,7 @@ boot-figwheel currently intend to provide same api that exist in [[https://githu
 ** Dependencies
 
 #+begin_src clojure
-  [ajchemist/boot-figwheel "0.5.4-3"] ;; latest release
+  [ajchemist/boot-figwheel "0.5.4-4"] ;; latest release
   [org.clojure/tools.nrepl "0.2.12" :scope "test"]
   [com.cemerick/piggieback "0.2.1" :scope "test"]
   [figwheel-sidecar "0.5.4-4" :scope "test"]
@@ -89,6 +89,28 @@ try with
 - [[https://github.com/aJchemist/rum-mdl/blob/master/build.boot][rum-mdl]] project
 
 ** Change
+
+*** 0.5.4-4
+
+- [ BREAKING ] Integrate =boot-figwheel= and =fw-build-once= task functionalities into =figwheel= task.
+- Add a new task-option of =figwheel=, called =once-ids= to specify configurations which are going to be built once.
+
+So now, please change following composed task
+
+#+begin_src clojure
+  (comp
+   (figwheel)
+   (boot-figwheel :ids ["main"])          ; -> "advanced" configuration is out of autobuilder
+   (fw-build-once :ids ["advanced"]))
+#+end_src
+
+to this oneliner
+
+#+begin_src clojure
+  (figwheel :build-ids ["main"] :once-ids ["advanced"])
+#+end_src
+
+
 *** 0.5.4-3
 
 - [ BREAKING ] Now users should configure their =:source-paths= in =:all-builds= task option. =(get-env :source-paths)= is no longer injected into user build configurations =:source-paths=.
