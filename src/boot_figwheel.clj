@@ -103,13 +103,15 @@
    '[figwheel-sidecar.system :as fs]
    '[com.stuartsierra.component :as component])
   (boot/task-options! figwheel (fn [opts] (merge opts *opts*)))
-  ;; FIXME:
-  ;; https://github.com/bhauman/lein-figwheel/blob/master/plugin/src/leiningen/figwheel.clj
-  ;; To assimilate `lein figwheel` experience
-  (start-figwheel!)
-  (when (and once-ids (figwheel-running?))
-    (apply build-once once-ids))
-  identity)
+  (fn [next-task]
+    (fn [fileset]
+      ;; FIXME:
+      ;; https://github.com/bhauman/lein-figwheel/blob/master/plugin/src/leiningen/figwheel.clj
+      ;; To assimilate `lein figwheel` experience
+      (start-figwheel!)
+      (when (and once-ids (figwheel-running?))
+        (apply build-once once-ids))
+      (next-task fileset))))
 
 (definline ^:private task-options [] '(:task-options (meta #'figwheel)))
 

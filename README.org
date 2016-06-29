@@ -9,7 +9,7 @@
 [[https://clojars.org/ajchemist/boot-figwheel][https://img.shields.io/clojars/v/ajchemist/boot-figwheel.svg]]
 [[https://jarkeeper.com/ajchemist/boot-figwheel][https://jarkeeper.com/ajchemist/boot-figwheel/downloads.svg]]
 [[https://jarkeeper.com/ajchemist/boot-figwheel][https://jarkeeper.com/ajchemist/boot-figwheel/status.svg]]
-[[https://github.com/aJchemist/cljs-devtools-sample/blob/master/build.boot][https://img.shields.io/badge/project-example-ff69b4.svg]]
+[[https://github.com/aJchemist/cljs-devtools-sample/blob/master/build.boot][https://img.shields.io/badge/example-build.boot-ff69b4.svg]]
 
 [[Figwheel]] interface for [[Boot]] repl.
 
@@ -18,7 +18,7 @@ boot-figwheel currently intend to provide same api that exist in [[https://githu
 ** Dependencies
 
 #+begin_src clojure
-  [ajchemist/boot-figwheel "0.5.4-4"] ;; latest release
+  [ajchemist/boot-figwheel "0.5.4-5"] ;; latest release
   [org.clojure/tools.nrepl "0.2.12" :scope "test"]
   [com.cemerick/piggieback "0.2.1" :scope "test"]
   [figwheel-sidecar "0.5.4-5" :scope "test"]
@@ -90,6 +90,10 @@ try with
 - [[https://github.com/aJchemist/rum-mdl/blob/master/build.boot][rum-mdl]] project
 
 ** Change
+
+*** 0.5.4-5
+
+- Separate =figwheel= task into two parts, one is a preamble and another is a middleware.
 
 *** 0.5.4-4
 
