@@ -7,6 +7,7 @@
 #+LINK: Figwheel       https://github.com/bhauman/lein-figwheel
 
 [[https://clojars.org/ajchemist/boot-figwheel][https://img.shields.io/clojars/v/ajchemist/boot-figwheel.svg]]
+[[https://circleci.com/gh/aJchemist/boot-figwheel][https://circleci.com/gh/aJchemist/boot-figwheel.svg?style=shield]]
 [[https://jarkeeper.com/ajchemist/boot-figwheel][https://jarkeeper.com/ajchemist/boot-figwheel/downloads.svg]]
 [[https://jarkeeper.com/ajchemist/boot-figwheel][https://jarkeeper.com/ajchemist/boot-figwheel/status.svg]]
 [[https://github.com/aJchemist/cljs-devtools-sample/blob/master/build.boot][https://img.shields.io/badge/example-build.boot-ff69b4.svg]]
