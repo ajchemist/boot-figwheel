@@ -1,6 +1,10 @@
 machine:
   java:
     version: openjdk8
+checkout:
+  post:
+    - git submodule sync
+    - git submodule update --init
 dependencies:
   cache_directories:
     - "~/.boot/cache/lib"
@@ -9,9 +13,11 @@ dependencies:
     - curl -L https://github.com/boot-clj/boot-bin/releases/download/latest/boot.sh -o ~/bin/boot
     - chmod +x ~/bin/boot
   override:
-    - boot -P show -d
+    - boot -u
+    - boot show -d
 test:
   override:
-    - boot run-tests -j junit
+    - boot test-profile test
+    - cd example/cljs-devtools-sample; boot demo-figwheel; cd -
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - find . -type f -regex ".*/target/junit/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;

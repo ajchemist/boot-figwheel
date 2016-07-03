@@ -19,7 +19,7 @@
       :license {"Eclipse Public License - v 1.0" "http://www.eclipse.org/legal/epl-v10.html"}}
  aot {:all true}
  jar {:main 'boot-figwheel}
- test {:namespaces #{'boot-figwheel.test}}
+ test {:namespaces #{'boot-figwheel.test} :junit-output-to "junit"}
  push {:repo "deploy-clojars"})
 
 (deftask test-profile []
@@ -30,19 +30,13 @@
      [boot/core "2.6.0" :scope "test"]
      [org.clojure/tools.nrepl "0.2.12" :scope "test"]
      [com.cemerick/piggieback "0.2.1" :scope "test"]
-     [figwheel-sidecar "0.5.4-4" :scope "test"]
+     [figwheel-sidecar "0.5.4-5" :scope "test"]
      [ring/ring-core "1.5.0"
       :scope "test"
       :exclusions
       [org.clojure/tools.reader
        org.clojure/clojure]]])
   identity)
-
-(deftask run-tests
-  [j junit-output-to JUNIT str "Test report destination"]
-  (comp
-   (test-profile)
-   (test :junit-output-to junit-output-to)))
 
 (deftask build
   "Build project.
