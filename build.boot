@@ -38,6 +38,12 @@
        org.clojure/clojure]]])
   identity)
 
+(deftask run-tests
+  [j junit-output-to JUNIT str "Test report destination"]
+  (comp
+   (test-profile)
+   (test :junit-output-to junit-output-to)))
+
 (deftask build
   "Build project.
 
