@@ -2,7 +2,7 @@
  :resource-paths #{"src"}
  :dependencies
  '[[adzerk/bootlaces "0.1.13" :scope "test"]
-   [adzerk/boot-test "1.1.1" :scope "test"]])
+   [adzerk/boot-test "1.1.2" :scope "test"]])
 
 (require
  '[adzerk.bootlaces :refer :all]
@@ -19,7 +19,7 @@
       :license {"Eclipse Public License - v 1.0" "http://www.eclipse.org/legal/epl-v10.html"}}
  aot {:all true}
  jar {:main 'boot-figwheel}
- test {:namespaces #{'boot-figwheel.test} :junit-output-to "junit"}
+ test {:namespaces #{'boot-figwheel.test}}
  push {:repo "deploy-clojars"})
 
 (deftask test-profile []
