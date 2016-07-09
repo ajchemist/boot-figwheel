@@ -17,7 +17,7 @@ dependencies:
     - "~/.boot/cache/bin"
 test:
   override:
-    # deps tree in a package 
+    # deps tree in a package
     - boot show -d
     - boot test-profile test -j junit
     - cd example/cljs-devtools-sample; boot demo-figwheel; cd -

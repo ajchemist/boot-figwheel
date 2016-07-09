@@ -30,7 +30,7 @@
      [boot/core "2.6.0" :scope "test"]
      [org.clojure/tools.nrepl "0.2.12" :scope "test"]
      [com.cemerick/piggieback "0.2.1" :scope "test"]
-     [figwheel-sidecar "0.5.4-5" :scope "test"]
+     [figwheel-sidecar "0.5.4-7" :scope "test"]
      [ring/ring-core "1.5.0"
       :scope "test"
       :exclusions
