@@ -52,22 +52,34 @@
             (.getPath (file/relative-to target-path parent)))))
       build)))
 
+(defn- file? [x] (instance? java.io.File x))
+
+(defmacro ^:private conditional-assoc-in
+  [m pred ks v]
+  `(if ~pred
+     (assoc-in ~m ~ks ~v)
+     ~m))
+
 (defn- update-build-output-dir
-  [{id :id :as build}]
-  (let [target-path (:target-path (task-options))
-        output-to   (get-in build [:compiler :output-to])
-        parent      (file/parent output-to)
-        output-dir  (get-in build [:compiler :output-dir])
-        output-dir  (if (string? output-dir)
-                      (jio/file parent output-dir)
-                      (jio/file parent (str id ".out")))
-        asset-path  (get-in build [:compiler :asset-path])
-        asset-path  (if (string? asset-path)
-                      (jio/file asset-path)
-                      (file/relative-to target-path output-dir))]
+  [{id :id
+    {:keys [optimizations
+            output-to
+            output-dir
+            asset-path]} :compiler
+    :as build}]
+  (let [target-path  (:target-path (task-options))
+        parent     (file/parent output-to)
+        output-dir (cond
+                     (string? output-dir) (jio/file parent output-dir)
+                     (contains? #{nil :none} optimizations) (jio/file parent (str id ".out"))
+                     :else output-dir)
+        asset-path (cond
+                     (string? asset-path) (jio/file asset-path)
+                     (contains? #{nil :none} optimizations) (file/relative-to target-path output-dir)
+                     :else asset-path)]
     (-> build
-      (assoc-in [:compiler :output-dir] (.getPath output-dir))
-      (assoc-in [:compiler :asset-path] (.getPath asset-path)))))
+      (conditional-assoc-in (file? output-dir) [:compiler :output-dir] (.getPath output-dir))
+      (conditional-assoc-in (file? asset-path) [:compiler :asset-path] (.getPath asset-path)))))
 
 (defn- update-output-path [options]
   (update options :all-builds

@@ -41,4 +41,16 @@
         {{:keys [output-to output-dir asset-path]} :compiler} app-build]
     (is (= output-to "target/subdir/app.js"))
     (is (= output-dir "target/subdir"))
-    (is (= asset-path "subdir"))))
+    (is (= asset-path "subdir")))
+  (boot/task-options!
+   figwheel
+   {:build-ids  ["main"]
+    :all-builds [{:id "main"
+                  :compiler {:output-to "subdir/app.js" :output-dir ""}}
+                 {:id "main-release"
+                  :compiler {:optimizations :advanced
+                             :output-to "subdir/app.js"}}]})
+  (let [{[_ release-build] :all-builds} (make-start-fw-task-options)
+        {{:keys [output-to output-dir asset-path]} :compiler} release-build]
+    (is (= output-to "target/subdir/app.js"))
+    (is (and (nil? output-dir) (nil? asset-path)))))
