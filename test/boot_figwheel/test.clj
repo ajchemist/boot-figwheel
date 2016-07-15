@@ -1,9 +1,26 @@
 (ns boot-figwheel.test
   (:require
-   [clojure.test :refer [deftest is]]
+   [clojure.test :refer [deftest testing is]]
+   [clojure.string :as string]
    [clojure.java.io :as jio]
+   [clojure.java.shell :as shell]
    [boot.core :as boot]
    [boot-figwheel :refer :all]))
+
+(def pwd (System/getProperty "user.dir"))
+
+(defn exec [& cmd]
+  (testing cmd
+    (when-not (identical? pwd shell/*sh-dir*)
+      (print "On" (str "\"" shell/*sh-dir* "\", ")))
+    (println "Running" (str "\"" (string/join " " cmd) "\""))
+    (let [{:keys [exit out err dir]} (apply shell/sh cmd)]
+      (is (= exit 0))
+      (when-not (string/blank? err)
+        (binding [*out* *err*]
+          (println err)))
+      (when-not (string/blank? out)
+        (println out)))))
 
 (deftest make-proper-task-options
   (boot/task-options! figwheel {})
@@ -54,3 +71,7 @@
         {{:keys [output-to output-dir asset-path]} :compiler} release-build]
     (is (= output-to "target/subdir/app.js"))
     (is (and (nil? output-dir) (nil? asset-path)))))
+
+(deftest cljs-devtools-example
+  (shell/with-sh-dir "example/cljs-devtools-sample"
+    (exec "boot" "demo-figwheel")))
