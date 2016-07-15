@@ -19,7 +19,7 @@ boot-figwheel currently intend to provide same api that exist in [[https://githu
 ** Dependencies
 
 #+begin_src clojure
-  [ajchemist/boot-figwheel "0.5.4-5"] ;; latest release
+  [ajchemist/boot-figwheel "0.5.4-6"] ;; latest release
   [org.clojure/tools.nrepl "0.2.12" :scope "test"]
   [com.cemerick/piggieback "0.2.1" :scope "test"]
   [figwheel-sidecar "0.5.4-7" :scope "test"]
@@ -91,6 +91,10 @@ try with
 - [[https://github.com/aJchemist/rum-mdl/blob/master/build.boot][rum-mdl]] project
 
 ** Change
+
+*** 0.5.4-6
+
+- When =:optimizations= is not =:none=, then =:output-dir= will not configured by default.
 
 *** 0.5.4-5
 
