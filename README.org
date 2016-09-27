@@ -8,8 +8,6 @@
 
 [[https://clojars.org/ajchemist/boot-figwheel][https://img.shields.io/clojars/v/ajchemist/boot-figwheel.svg]]
 [[https://circleci.com/gh/aJchemist/boot-figwheel][https://circleci.com/gh/aJchemist/boot-figwheel.svg?style=shield]]
-[[https://jarkeeper.com/ajchemist/boot-figwheel][https://jarkeeper.com/ajchemist/boot-figwheel/downloads.svg]]
-[[https://jarkeeper.com/ajchemist/boot-figwheel][https://jarkeeper.com/ajchemist/boot-figwheel/status.svg]]
 [[https://github.com/aJchemist/cljs-devtools-sample/blob/master/build.boot][https://img.shields.io/badge/example-build.boot-ff69b4.svg]]
 
 [[Figwheel]] interface for [[Boot]] repl.
@@ -22,7 +20,7 @@ boot-figwheel currently intend to provide same api that exist in [[https://githu
   [ajchemist/boot-figwheel "0.5.4-6"] ;; latest release
   [org.clojure/tools.nrepl "0.2.12" :scope "test"]
   [com.cemerick/piggieback "0.2.1" :scope "test"]
-  [figwheel-sidecar "0.5.4-7" :scope "test"]
+  [figwheel-sidecar "0.5.7" :scope "test"]
 #+end_src
 
 figwheel-sidecar whose version is above =0.5.x= would be well accepted.
@@ -58,14 +56,13 @@ When users need to change their cljsbuild config on live, just eval =(task-optio
 
 If a user doesn't supply =build-ids= options, figwheel-system will build all build configurations.
 
-#+begin_src clojure
-  (deftask dev []
-    (comp (repl) (figwheel) (wait)))
-#+end_src
+Now start a boot repl.
+
+: boot figwheel repl
 
 =figwheel= task updates =:output-to= compiler option so that the build output locate in =:target-path= (default is "target").
 
-After dev repl is fired, ordinary dev routines follow.
+After the repl is started, ordinary dev routines follow.
 #+begin_src clojure
   boot.user> (start-figwheel!)
   boot.user> (start-autobuild)
@@ -80,6 +77,8 @@ After dev repl is fired, ordinary dev routines follow.
   boot.user> (start-figwheel!)
 #+end_src
 
+when =(fw-cljs-repl)= is an issue, then see [[https://github.com/aJchemist/boot-figwheel/issues/7][#7]].
+
 ** Other examples
 
 - [[https://github.com/aJchemist/cljs-devtools-sample/blob/master/build.boot][cljs-devtools-sample]] project
@@ -88,13 +87,17 @@ try with
 
 : boot demo
 
+or
+
+: boot demo-figwheel repl
+
 - [[https://github.com/aJchemist/rum-mdl/blob/master/build.boot][rum-mdl]] project
 
 ** Change
 
 *** 0.5.4-6
 
-- When =:optimizations= is not =:none=, then =:output-dir= will not configured by default.
+- When =:optimizations= is not =:none=, then =:output-dir= will not be configured by default.
 
 *** 0.5.4-5
 
