@@ -1,8 +1,21 @@
 (set-env!
- :resource-paths #{"src"}
+ :resource-paths #{"src"})
+
+(merge-env!
  :dependencies
  '[[adzerk/bootlaces "0.1.13" :scope "test"]
-   [adzerk/boot-test "1.1.2" :scope "test"]])
+   [adzerk/boot-test "1.1.2" :scope "test"]
+
+   [org.clojure/clojure "1.8.0" :scope "provided"]
+   [boot/core "2.6.0" :scope "test"]
+   [org.clojure/tools.nrepl "0.2.12" :scope "test"]
+   [com.cemerick/piggieback "0.2.1" :scope "test"]
+   [figwheel-sidecar "0.5.7" :scope "test"]
+   [ring/ring-core "1.5.0"
+    :scope "test"
+    :exclusions
+    [org.clojure/tools.reader
+     org.clojure/clojure]]])
 
 (require
  '[adzerk.bootlaces :refer :all]
@@ -23,19 +36,7 @@
  push {:repo "deploy-clojars"})
 
 (deftask test-profile []
-  (merge-env!
-   :source-paths #{"test"}
-   :dependencies
-   '[[org.clojure/clojure "1.8.0" :scope "provided"]
-     [boot/core "2.6.0" :scope "test"]
-     [org.clojure/tools.nrepl "0.2.12" :scope "test"]
-     [com.cemerick/piggieback "0.2.1" :scope "test"]
-     [figwheel-sidecar "0.5.4-7" :scope "test"]
-     [ring/ring-core "1.5.0"
-      :scope "test"
-      :exclusions
-      [org.clojure/tools.reader
-       org.clojure/clojure]]])
+  (merge-env! :source-paths #{"test"})
   identity)
 
 (deftask build
